@@ -1,0 +1,59 @@
+{
+  "0": {
+    "id": 0,
+    "name": "Unranked",
+    "balanced": true
+  },
+  "1": {
+    "id": 1,
+    "name": "Practice",
+    "balanced": true
+  },
+  "2": {
+    "id": 2,
+    "name": "Tournament",
+    "balanced": true
+  },
+  "3": {
+    "id": 3,
+    "name": "Tutorial"
+  },
+  "4": {
+    "id": 4,
+    "name": "Co-op Bots"
+  },
+  "5": {
+    "id": 5,
+    "name": "Ranked Team",
+    "balanced": true
+  },
+  "6": {
+    "id": 6,
+    "name": "Ranked Solo",
+    "balanced": true
+  },
+  "7": {
+    "id": 7,
+    "name": "Ranked",
+    "balanced": true
+  },
+  "8": {
+    "id": 8,
+    "name": "1v1 Mid"
+  },
+  "9": {
+    "id": 9,
+    "name": "Battlecup",
+    "balanced": true
+  },
+  "12": {
+    "id": 12,
+    "name": "Nemestice",
+    "balanced": true
+  },
+  "14": {
+    "id": 9,
+    "name": "New Player Mode",
+    "balanced": true
+  }
+}
