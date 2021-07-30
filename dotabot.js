@@ -27,7 +27,7 @@ const getApp = (guildId) => {
 	return app;
 }
 
-client.login("ODU1OTgwODk1ODk5MjIyMDI2.YM6YVA.Vi8V_H-YUytfB5IBs3_a9_EXIdQ");
+client.login(config.token);
 
 client.on("ready", async () => {
 	console.log("Start...");
