@@ -3,22 +3,22 @@
         {
             "name": "anti-mage",
             "id": 1,
-            "localized_name": "Anti-Mage"
+            "localized-name": "Anti-Mage"
         },
         {
             "name": "axe",
             "id": 2,
-            "localized_name": "Axe"
+            "localized-name": "Axe"
         },
         {
             "name": "bane",
             "id": 3,
-            "localized_name": "Bane"
+            "localized-name": "Bane"
         },
         {
             "name": "bloodseeker",
             "id": 4,
-            "localized_name": "Bloodseeker"
+            "localized-name": "Bloodseeker"
         },
         {
             "name": "crystal-maiden",
