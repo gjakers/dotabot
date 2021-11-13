@@ -17,9 +17,9 @@ heroes_dict = {}
 for url in image_urls:
     hero_name = re.search("\/assets\/heroes\/(.{1,23})-", url).group(1)
     hero_obj = name_to_obj[hero_name]
-    heroes_dict[str(hero_obj["name"])] = {
+    heroes_dict[str(hero_obj["id"])] = {
         "id": hero_obj["id"],
         "name": hero_obj["localized-name"],
         "image": "http://dotabuff.com" + url
     }
-print(heroes_dict)
+print(str(heroes_dict))
