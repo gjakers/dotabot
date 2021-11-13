@@ -7,4 +7,4 @@ Then update hero_ids.txt with any new heroes.
 
 Lastly, run the script with:
 
-`python parse-heroes.py > hero-images.py`
+`python parse-heroes.py > hero-images.json`
