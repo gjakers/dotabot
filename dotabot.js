@@ -5,6 +5,7 @@ const fs = require('fs');
 const config = require('./config.json');
 const { builtinModules } = require('module');
 const request   = require('request');
+const { match } = require("assert");
 
 // Load hero data
 let raw_heroes = fs.readFileSync('./hero-images.json');
@@ -91,7 +92,8 @@ client.ws.on('INTERACTION_CREATE', async (interaction) => {
 		if(subcommand == 'username') {
 			
 			var player = await client.users.fetch(options[0].options[0].value.toString());
-			console.log(player.username);
+			console.log(player.username + " " + player.id );
+
 			if(players.hasOwnProperty(player.id)) {
 				playerID = players[player.id].id;
 				playerName = player.username;
@@ -112,18 +114,34 @@ client.ws.on('INTERACTION_CREATE', async (interaction) => {
 			playerName = playerID;
 		}
 
-		var matches = await recentMatches(playerID);
-		var embeds = recentEmbed(matches);
-
-		client.api.interactions(interaction.id, interaction.token).callback.post({
-			data: {
-				type: 4,
-				data: {
-					content: "Recent matches for **" + playerName + "**",
-					embeds: embeds,
-				}
+		//var matches = await recentMatches(playerID);
+		recentMatches(playerID).then(function(matches) {
+			if (matches.length)                             
+			{
+				var embeds = recentEmbed(matches);
+				client.api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: "Recent matches for **" + playerName + "**",
+							embeds: embeds,
+						}
+					}
+				})
+			} else {
+				client.api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: "OpenDota is not working, or something",
+						}
+					}
+				})
 			}
-		})
+		}).catch(function(err) {
+			console.log(err);
+		});
+		
 	}
 })
 
@@ -194,9 +212,15 @@ async function recentMatches(id) {
 				};
 	return new Promise ((resolve, reject) => {
 		request(options, function(err, response, body) {
-			resolve(JSON.parse(body).slice(0,5));
+			if (err) return reject(err);
+			try{
+				resolve(JSON.parse(body).slice(0,5));
+				//resolve(JSON.parse("{}{}<<<<sdflksmlfs"));
+			} catch(e){
+				console.log("here");
+				resolve('');
+			}
 		});
-
 	});
 }
 
