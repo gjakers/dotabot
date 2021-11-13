@@ -1,0 +1,615 @@
+{
+    "heroes": [
+        {
+            "name": "anti-mage",
+            "id": 1,
+            "localized_name": "Anti-Mage"
+        },
+        {
+            "name": "axe",
+            "id": 2,
+            "localized_name": "Axe"
+        },
+        {
+            "name": "bane",
+            "id": 3,
+            "localized_name": "Bane"
+        },
+        {
+            "name": "bloodseeker",
+            "id": 4,
+            "localized_name": "Bloodseeker"
+        },
+        {
+            "name": "crystal-maiden",
+            "id": 5,
+            "localized-name": "Crystal Maiden"
+        },
+        {
+            "name": "drow-ranger",
+            "id": 6,
+            "localized-name": "Drow Ranger"
+        },
+        {
+            "name": "earthshaker",
+            "id": 7,
+            "localized-name": "Earthshaker"
+        },
+        {
+            "name": "juggernaut",
+            "id": 8,
+            "localized-name": "Juggernaut"
+        },
+        {
+            "name": "mirana",
+            "id": 9,
+            "localized-name": "Mirana"
+        },
+        {
+            "name": "shadow-fiend",
+            "id": 11,
+            "localized-name": "Shadow Fiend"
+        },
+        {
+            "name": "morphling",
+            "id": 10,
+            "localized-name": "Morphling"
+        },
+        {
+            "name": "phantom-lancer",
+            "id": 12,
+            "localized-name": "Phantom Lancer"
+        },
+        {
+            "name": "puck",
+            "id": 13,
+            "localized-name": "Puck"
+        },
+        {
+            "name": "pudge",
+            "id": 14,
+            "localized-name": "Pudge"
+        },
+        {
+            "name": "razor",
+            "id": 15,
+            "localized-name": "Razor"
+        },
+        {
+            "name": "sand-king",
+            "id": 16,
+            "localized-name": "Sand King"
+        },
+        {
+            "name": "storm-spirit",
+            "id": 17,
+            "localized-name": "Storm Spirit"
+        },
+        {
+            "name": "sven",
+            "id": 18,
+            "localized-name": "Sven"
+        },
+        {
+            "name": "tiny",
+            "id": 19,
+            "localized-name": "Tiny"
+        },
+        {
+            "name": "vengeful-spirit",
+            "id": 20,
+            "localized-name": "Vengeful Spirit"
+        },
+        {
+            "name": "windranger",
+            "id": 21,
+            "localized-name": "Windranger"
+        },
+        {
+            "name": "zeus",
+            "id": 22,
+            "localized-name": "Zeus"
+        },
+        {
+            "name": "kunkka",
+            "id": 23,
+            "localized-name": "Kunkka"
+        },
+        {
+            "name": "lina",
+            "id": 25,
+            "localized-name": "Lina"
+        },
+        {
+            "name": "lich",
+            "id": 31,
+            "localized-name": "Lich"
+        },
+        {
+            "name": "lion",
+            "id": 26,
+            "localized-name": "Lion"
+        },
+        {
+            "name": "shadow-shaman",
+            "id": 27,
+            "localized-name": "Shadow Shaman"
+        },
+        {
+            "name": "slardar",
+            "id": 28,
+            "localized-name": "Slardar"
+        },
+        {
+            "name": "tidehunter",
+            "id": 29,
+            "localized-name": "Tidehunter"
+        },
+        {
+            "name": "witch-doctor",
+            "id": 30,
+            "localized-name": "Witch Doctor"
+        },
+        {
+            "name": "riki",
+            "id": 32,
+            "localized-name": "Riki"
+        },
+        {
+            "name": "enigma",
+            "id": 33,
+            "localized-name": "Enigma"
+        },
+        {
+            "name": "tinker",
+            "id": 34,
+            "localized-name": "Tinker"
+        },
+        {
+            "name": "sniper",
+            "id": 35,
+            "localized-name": "Sniper"
+        },
+        {
+            "name": "necrophos",
+            "id": 36,
+            "localized-name": "Necrophos"
+        },
+        {
+            "name": "warlock",
+            "id": 37,
+            "localized-name": "Warlock"
+        },
+        {
+            "name": "beastmaster",
+            "id": 38,
+            "localized-name": "Beastmaster"
+        },
+        {
+            "name": "queen-of-pain",
+            "id": 39,
+            "localized-name": "Queen of Pain"
+        },
+        {
+            "name": "venomancer",
+            "id": 40,
+            "localized-name": "Venomancer"
+        },
+        {
+            "name": "faceless-void",
+            "id": 41,
+            "localized-name": "Faceless Void"
+        },
+        {
+            "name": "wraith-king",
+            "id": 42,
+            "localized-name": "Skeleton King"
+        },
+        {
+            "name": "death-prophet",
+            "id": 43,
+            "localized-name": "Death Prophet"
+        },
+        {
+            "name": "phantom-assassin",
+            "id": 44,
+            "localized-name": "Phantom Assassin"
+        },
+        {
+            "name": "pugna",
+            "id": 45,
+            "localized-name": "Pugna"
+        },
+        {
+            "name": "templar-assassin",
+            "id": 46,
+            "localized-name": "Templar Assassin"
+        },
+        {
+            "name": "viper",
+            "id": 47,
+            "localized-name": "Viper"
+        },
+        {
+            "name": "luna",
+            "id": 48,
+            "localized-name": "Luna"
+        },
+        {
+            "name": "dragon-knight",
+            "id": 49,
+            "localized-name": "Dragon Knight"
+        },
+        {
+            "name": "dazzle",
+            "id": 50,
+            "localized-name": "Dazzle"
+        },
+        {
+            "name": "clockwerk",
+            "id": 51,
+            "localized-name": "Clockwerk"
+        },
+        {
+            "name": "leshrac",
+            "id": 52,
+            "localized-name": "Leshrac"
+        },
+        {
+            "name": "natures-prophet",
+            "id": 53,
+            "localized-name": "Nature's Prophet"
+        },
+        {
+            "name": "lifestealer",
+            "id": 54,
+            "localized-name": "Lifestealer"
+        },
+        {
+            "name": "dark-seer",
+            "id": 55,
+            "localized-name": "Dark Seer"
+        },
+        {
+            "name": "clinkz",
+            "id": 56,
+            "localized-name": "Clinkz"
+        },
+        {
+            "name": "omniknight",
+            "id": 57,
+            "localized-name": "Omniknight"
+        },
+        {
+            "name": "enchantress",
+            "id": 58,
+            "localized-name": "Enchantress"
+        },
+        {
+            "name": "huskar",
+            "id": 59,
+            "localized-name": "Huskar"
+        },
+        {
+            "name": "night-stalker",
+            "id": 60,
+            "localized-name": "Night Stalker"
+        },
+        {
+            "name": "broodmother",
+            "id": 61,
+            "localized-name": "Broodmother"
+        },
+        {
+            "name": "bounty-hunter",
+            "id": 62,
+            "localized-name": "Bounty Hunter"
+        },
+        {
+            "name": "weaver",
+            "id": 63,
+            "localized-name": "Weaver"
+        },
+        {
+            "name": "jakiro",
+            "id": 64,
+            "localized-name": "Jakiro"
+        },
+        {
+            "name": "batrider",
+            "id": 65,
+            "localized-name": "Batrider"
+        },
+        {
+            "name": "chen",
+            "id": 66,
+            "localized-name": "Chen"
+        },
+        {
+            "name": "spectre",
+            "id": 67,
+            "localized-name": "Spectre"
+        },
+        {
+            "name": "doom",
+            "id": 69,
+            "localized-name": "Doom"
+        },
+        {
+            "name": "ancient-apparition",
+            "id": 68,
+            "localized-name": "Ancient Apparition"
+        },
+        {
+            "name": "ursa",
+            "id": 70,
+            "localized-name": "Ursa"
+        },
+        {
+            "name": "spirit-breaker",
+            "id": 71,
+            "localized-name": "Spirit Breaker"
+        },
+        {
+            "name": "gyrocopter",
+            "id": 72,
+            "localized-name": "Gyrocopter"
+        },
+        {
+            "name": "alchemist",
+            "id": 73,
+            "localized-name": "Alchemist"
+        },
+        {
+            "name": "invoker",
+            "id": 74,
+            "localized-name": "Invoker"
+        },
+        {
+            "name": "silencer",
+            "id": 75,
+            "localized-name": "Silencer"
+        },
+        {
+            "name": "outworld-destroyer",
+            "id": 76,
+            "localized-name": "Outworld Devourer"
+        },
+        {
+            "name": "lycan",
+            "id": 77,
+            "localized-name": "Lycanthrope"
+        },
+        {
+            "name": "brewmaster",
+            "id": 78,
+            "localized-name": "Brewmaster"
+        },
+        {
+            "name": "shadow-demon",
+            "id": 79,
+            "localized-name": "Shadow Demon"
+        },
+        {
+            "name": "lone-druid",
+            "id": 80,
+            "localized-name": "Lone Druid"
+        },
+        {
+            "name": "chaos-knight",
+            "id": 81,
+            "localized-name": "Chaos Knight"
+        },
+        {
+            "name": "meepo",
+            "id": 82,
+            "localized-name": "Meepo"
+        },
+        {
+            "name": "treant-protector",
+            "id": 83,
+            "localized-name": "Treant Protector"
+        },
+        {
+            "name": "ogre-magi",
+            "id": 84,
+            "localized-name": "Ogre Magi"
+        },
+        {
+            "name": "undying",
+            "id": 85,
+            "localized-name": "Undying"
+        },
+        {
+            "name": "rubick",
+            "id": 86,
+            "localized-name": "Rubick"
+        },
+        {
+            "name": "disruptor",
+            "id": 87,
+            "localized-name": "Disruptor"
+        },
+        {
+            "name": "nyx-assassin",
+            "id": 88,
+            "localized-name": "Nyx Assassin"
+        },
+        {
+            "name": "naga-siren",
+            "id": 89,
+            "localized-name": "Naga Siren"
+        },
+        {
+            "name": "keeper-of-the-light",
+            "id": 90,
+            "localized-name": "Keeper of the Light"
+        },
+        {
+            "name": "io",
+            "id": 91,
+            "localized-name": "Wisp"
+        },
+        {
+            "name": "visage",
+            "id": 92,
+            "localized-name": "Visage"
+        },
+        {
+            "name": "slark",
+            "id": 93,
+            "localized-name": "Slark"
+        },
+        {
+            "name": "medusa",
+            "id": 94,
+            "localized-name": "Medusa"
+        },
+        {
+            "name": "troll-warlord",
+            "id": 95,
+            "localized-name": "Troll Warlord"
+        },
+        {
+            "name": "centaur-warrunner",
+            "id": 96,
+            "localized-name": "Centaur Warrunner"
+        },
+        {
+            "name": "magnus",
+            "id": 97,
+            "localized-name": "Magnus"
+        },
+        {
+            "name": "timbersaw",
+            "id": 98,
+            "localized-name": "Timbersaw"
+        },
+        {
+            "name": "bristleback",
+            "id": 99,
+            "localized-name": "Bristleback"
+        },
+        {
+            "name": "tusk",
+            "id": 100,
+            "localized-name": "Tusk"
+        },
+        {
+            "name": "skywrath-mage",
+            "id": 101,
+            "localized-name": "Skywrath Mage"
+        },
+        {
+            "name": "abaddon",
+            "id": 102,
+            "localized-name": "Abaddon"
+        },
+        {
+            "name": "elder-titan",
+            "id": 103,
+            "localized-name": "Elder Titan"
+        },
+        {
+            "name": "legion-commander",
+            "id": 104,
+            "localized-name": "Legion Commander"
+        },
+        {
+            "name": "ember-spirit",
+            "id": 106,
+            "localized-name": "Ember Spirit"
+        },
+        {
+            "name": "earth-spirit",
+            "id": 107,
+            "localized-name": "Earth Spirit"
+        },
+        {
+            "name": "underlord",
+            "id": 108,
+            "localized-name": "Abyssal Underlord"
+        },
+        {
+            "name": "terrorblade",
+            "id": 109,
+            "localized-name": "Terrorblade"
+        },
+        {
+            "name": "phoenix",
+            "id": 110,
+            "localized-name": "Phoenix"
+        },
+        {
+            "name": "techies",
+            "id": 105,
+            "localized-name": "Techies"
+        },
+        {
+            "name": "oracle",
+            "id": 111,
+            "localized-name": "Oracle"
+        },
+        {
+            "name": "winter-wyvern",
+            "id": 112,
+            "localized-name": "Winter Wyvern"
+        },
+        {
+            "name": "arc-warden",
+            "id": 113,
+            "localized-name": "Arc Warden"
+        },
+        {
+            "name": "monkey-king",
+            "id": 114,
+            "localized-name": "Monkey King"
+        },
+        {
+            "name": "dark-willow",
+            "id": 119,
+            "localized-name": "Dark Willow"
+        },
+        {
+            "name": "pangolier",
+            "id": 120,
+            "localized-name": "Pangolier"
+        },
+        {
+            "name": "grimstroke",
+            "id": 121,
+            "localized-name": "Grimstroke"
+        },
+        {
+            "name": "hoodwink",
+            "id": 123,
+            "localized-name": "Hoodwink"
+        },
+        {
+            "name": "void-spirit",
+            "id": 126,
+            "localized-name": "Void Spirit"
+        },
+        {
+            "name": "snapfire",
+            "id": 128,
+            "localized-name": "Snapfire"
+        },
+        {
+            "name": "mars",
+            "id": 129,
+            "localized-name": "Mars"
+        },
+        {
+            "name": "dawnbreaker",
+            "id": 135,
+            "localized-name": "Dawnbreaker"
+        },
+        {
+            "name": "marci",
+            "id": 136,
+            "localized-name": "Marci"
+        }
+    ]
+}
+
