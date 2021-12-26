@@ -83,7 +83,7 @@ async function timeoutUser(user_id, minutes) {
 	}
 }
 
-async function timeoutCommand(client, interaction) {
+export async function timeoutCommand(client, interaction) {
     var timeout_length = interaction.data.options[0].value;
     if(timeout_length > 60) // too long! send ephemeral warning msg
     {
@@ -126,7 +126,7 @@ async function timeoutCommand(client, interaction) {
     }
 }
 
-async function timeoutButtons(client, interaction, command) {
+export async function timeoutButtons(client, interaction, command) {
     //Resolve buttonpress
     client.api.interactions(interaction.id, interaction.token).callback.post({
         data: {
@@ -187,5 +187,3 @@ async function timeoutButtons(client, interaction, command) {
         }
     });
 }
-
-module.exports = {timeoutCommand, timeoutButtons};

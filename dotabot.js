@@ -81,33 +81,28 @@ client.on("ready", async () => {
 });
 
 client.ws.on('INTERACTION_CREATE', async (interaction) => {
-	if(interaction.type == 2) // COMMAND
-	{
-		const { name, options } = interaction.data;
-		const command = name.toLowerCase();
-
-		switch (command) {
-			case 'recent':
-				dota.recent(client, interaction);
-				break;
-			case 'timeout':
-				smok_timeout.timeoutCommand(client, interaction);
-				break;
-			default:
-				console.log("Unknown command recieved!")
-		}
-	}
-	if (interaction.type == 3) // BUTTON
-	{
-		const command = interaction.data.custom_id.toLowerCase();
-		switch (command) {
-			case 'vote_yes':
-			case 'vote_no':
-				smok_timeout.timeoutButtons(client, interaction, command);
-				break;
-			default:
-				console.log("Unknown button pressed!")
-		}
+	switch(interaction.type) {
+		case 2: // COMMAND
+			switch (interaction.name.toLowerCase()) {
+				case 'recent':
+					dota.recent(client, interaction);
+					break;
+				case 'timeout':
+					smok_timeout.timeoutCommand(client, interaction);
+					break;
+				default:
+					console.log("Unknown command recieved!")
+			}
+			break;
+		case 3: // BUTTON
+			switch (interaction.data.custom_id.toLowerCase()) {
+				case 'vote_yes':
+				case 'vote_no':
+					smok_timeout.timeoutButtons(client, interaction, command);
+					break;
+				default:
+					console.log("Unknown button pressed!")
+			}
+			break;
 	}
 })
-
