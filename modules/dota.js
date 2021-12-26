@@ -13,7 +13,7 @@ let lobbies = JSON.parse(raw_lobbies);
 let raw_players = fs.readFileSync('./players.json');
 let players = JSON.parse(raw_players);
 
-async function recent(client, interaction) {
+export async function recent(client, interaction) {
     var options = interaction.data.options;
     var subcommand = options[0].name;
     var playerID = '';
@@ -130,7 +130,25 @@ async function recentMatches(id) {
 				resolve(JSON.parse(body).slice(0,5));
 				//resolve(JSON.parse("{}{}<<<<sdflksmlfs"));
 			} catch(e){
-				console.log("here");
+				console.log("failed to get recentMatches");
+				resolve('');
+			}
+		});
+	});
+}
+
+export function matches(id, count) {
+	var options = { url: "https://api.opendota.com/api/players/" + id + "/matches" + 
+						 "?limit=" + count,
+				    headers: default_headers
+				};
+	return new Promise ((resolve, reject) => {
+		request(options, function(err, response, body) {
+			if (err) return reject(err);
+			try{
+				resolve(JSON.parse(body));
+			} catch(e){
+				console.log("failed to get matches");
 				resolve('');
 			}
 		});
@@ -148,8 +166,6 @@ function getMatch(id) {
 }
 
 
-
-
 function timeAgo(seconds) {
 	let time_since = (Date.now() - new Date(seconds * 1000))/60000; //convert to minutes
 	var unit = "minute";
@@ -164,7 +180,3 @@ function timeAgo(seconds) {
 	return Math.floor(time_since).toString() + " " + unit + ((Math.floor(time_since) > 1) ? "s" : "");
 }
 
-
-
-
-module.exports = { recent };
