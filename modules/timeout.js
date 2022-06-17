@@ -1,4 +1,3 @@
-
 let smok_votes = {};
 const vote_types = {
 	YES:  1,
@@ -49,12 +48,12 @@ function closeVote(client, channel_id, message) {
 	});
 	
 	if(banned) { //Ban smok  872257325040291841
-		timeoutUser('872257325040291841', ban_duration);
+		timeoutUser(client, '872257325040291841', ban_duration);
 	}
 }
 
 // Give user 'silenced' role and remove 'dota' role, reverse if minutes = 0
-async function timeoutUser(user_id, minutes) {
+async function timeoutUser(client, user_id, minutes) {
 	client.guilds.fetch(guildId).then( guild => {
 		//Get 'silenced' role
 		let silenced = guild.roles.cache.find((role) => {
@@ -74,7 +73,7 @@ async function timeoutUser(user_id, minutes) {
 			}
 		}).catch(function(err) {
 			console.log(err);
-		});;
+		});
 	});
 
 	//Schedule the un-banning
@@ -188,4 +187,5 @@ async function timeoutButtons(client, interaction, command) {
     });
 }
 
-module.exports = {timeoutCommand, timeoutButtons};
+
+module.exports = { timeoutCommand, timeoutButtons };
