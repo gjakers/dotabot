@@ -1,0 +1,24 @@
+{
+  "name": "dotabot",
+  "version": "1.0.0",
+  "description": "A discord bot that tracks Dota 2 matchmaking data",
+  "main": "dotabot.js",
+  "scripts": {
+    "start": "node ./dotabot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gjakers/dotabot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gjakers/dotabot/issues"
+  },
+  "homepage": "https://github.com/gjakers/dotabot#readme",
+  "dependencies": {
+    "discord.js": "^13.8.0",
+    "dotenv": "^16.0.1",
+    "request": "^2.88.2"
+  }
+}

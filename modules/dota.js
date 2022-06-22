@@ -1,8 +1,5 @@
 const Discord = require("discord.js");
 const fs = require('fs');
-const { resolve } = require("path");
-const { getMaxListeners } = require("process");
-const request   = require('request');
 const opendota = require('./opendota.js');
 const player = require('./player.js');
 
