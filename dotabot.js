@@ -4,21 +4,17 @@ const client  = new Client({ intents: [Intents.FLAGS.GUILDS,
 									   Intents.FLAGS.GUILD_MESSAGES,
 									   Intents.FLAGS.GUILD_MEMBERS]
 						   });
-const config = require('./config.json');
-const { builtinModules } = require('module');
-const { match } = require("assert");
-
 const smok_timeout = require('./modules/timeout.js');
 const dota = require('./modules/dota.js');
 
 
 // Load player data
 const fs = require('fs');
-const { resolve } = require("path");
+// const { resolve } = require("path");
 let raw_players = fs.readFileSync('./players.json');
 let players = JSON.parse(raw_players);
 
-const guildId = config.guildID;
+const guildId = process.env.GUILD_ID;
 const getApp = (guildId) => {
 	const app = client.api.applications(client.user.id);
 	if (guildId) {
@@ -27,7 +23,7 @@ const getApp = (guildId) => {
 	return app;
 }
 
-client.login(config.token);
+client.login(process.env.DISCORD_SECRET_TOKEN);
 
 client.on("ready", async () => {
 	console.log("Start...");
