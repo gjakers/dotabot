@@ -4,17 +4,20 @@ const client  = new Client({ intents: [Intents.FLAGS.GUILDS,
 									   Intents.FLAGS.GUILD_MESSAGES,
 									   Intents.FLAGS.GUILD_MEMBERS]
 						   });
-const smok_timeout = require('./modules/timeout.js');
 const dota = require('./modules/dota.js');
 
 
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v9');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+
 // Load player data
 const fs = require('fs');
-// const { resolve } = require("path");
 let raw_players = fs.readFileSync('./players.json');
 let players = JSON.parse(raw_players);
 
 const guildId = process.env.GUILD_ID;
+const clientId = process.env.CLIENT_ID;
 const getApp = (guildId) => {
 	const app = client.api.applications(client.user.id);
 	if (guildId) {
@@ -23,55 +26,43 @@ const getApp = (guildId) => {
 	return app;
 }
 
-client.login(process.env.DISCORD_SECRET_TOKEN);
+const recentcommand = new SlashCommandBuilder()
+	.setName('recent')
+	.setDescription("Get recent matches of the player")
+	.addSubcommand(subcommand => subcommand
+		.setName('username')
+		.setDescription("Get match data using player's username")
+		.addUserOption(option => option
+			.setName('username')
+			.setDescription("Player's name")
+			.setRequired(true)
+		))
+	.addSubcommand(subcommand => subcommand
+		.setName('id')
+		.setDescription("Get match data using player's ID#")
+		.addStringOption(option => option
+			.setName('id')
+			.setDescription("Player's ID#")
+			.setRequired(true)
+		));
 
+const commands = [recentcommand, ];
+const rest = new REST({ version: '9'}).setToken(process.env.DISCORD_SECRET_TOKEN);
+(async () => {
+	try {
+		await rest.put(
+			Routes.applicationGuildCommands(clientId, guildId),
+			{ body: commands },
+		);
+	} catch (error) {
+		console.log(error);
+	}
+})();
+
+client.login(process.env.DISCORD_SECRET_TOKEN);
 client.on("ready", async () => {
 	console.log("Start...");
 	client.user.setActivity('Shame Simulator 2');
-	await getApp(guildId).commands.post({
-		data: {
-			name: "recent",
-			description: "Get recent matches of the player",
-			options: [
-				{
-					name: "username",
-					description: "Get match data using player's username",
-					type: 1,
-					options: [
-						{
-							name: "username",
-							description: "Player's name",
-							type: 6,
-							required: true
-						}
-					]
-				},
-				{
-					name: "id",
-					description: "Get match data using player's ID#",
-					type: 1,
-					options: [
-						{
-							name: "id",
-							description: "Player's ID#",
-							type: 3,
-							required: true
-						}
-					]
-				}
-			],
-			name: "timeout",
-			description: "Start a vote to put smok in timeout",
-			options: [
-				{
-					name: "minutes",
-					description: "How many minutes will the timeout be (1-60)",
-					type: 4,
-					required: true
-				}
-			]
-		},
-	});
 
 	/* GET/DELETE COMMANDS
 	 * Get guild commands
@@ -84,38 +75,27 @@ client.on("ready", async () => {
 			await client.api.applications(client.user.id).commands('855997652528529428').delete();
 	 */
 
-
 	client.guilds.fetch(guildId).then( guild => {
 		//list_members(guild);
 		dota.judgement(guild);
-		// setInterval(dota.judgement, 3600000, guild);
+	    setInterval(dota.judgement, 3600000, guild);
 	});
 });
 
-client.ws.on('INTERACTION_CREATE', async (interaction) => {
-	switch(interaction.type) {
-		case 2: // COMMAND
-			switch (interaction.data.name.toLowerCase()) {
-				case 'recent':
-					dota.recent(client, interaction);
-					break;
-				case 'timeout':
-					smok_timeout.timeoutCommand(client, interaction);
-					break;
-				default:
-					console.log("Unknown command recieved!")
-			}
-			break;
-		case 3: // BUTTON
-			switch (interaction.data.custom_id.toLowerCase()) {
-				case 'vote_yes':
-				case 'vote_no':
-					smok_timeout.timeoutButtons(client, interaction, command);
-					break;
-				default:
-					console.log("Unknown button pressed!")
-			}
-			break;
+client.on('interactionCreate', async (interaction) => {
+	if(interaction.isCommand()) {
+		switch(interaction.commandName) {
+			case 'recent':
+				dota.recent(interaction);
+				break;
+			default:
+				console.log("Unknown command received!")
+		}
+		return;
+	}
+
+	if(interaction.isButton()) {
+		return;
 	}
 });
 

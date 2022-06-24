@@ -13,59 +13,32 @@ let lobbies = JSON.parse(raw_lobbies);
 let raw_players = fs.readFileSync('./players.json');
 let players = JSON.parse(raw_players);
 
-async function recent(client, interaction) {
-    var options = interaction.data.options;
-    var subcommand = options[0].name;
+async function recent(interaction) {
     var playerID = '';
-    var playerName = '';
-    if(subcommand == 'username') {
-        
-        var player = await client.users.fetch(options[0].options[0].value.toString());
+
+    if(interaction.options.getSubcommand() === 'username') {
+        var player = interaction.options.getUser('username');
         console.log("recent: " + player.username + " " + player.id );
 
         if(players.hasOwnProperty(player.id)) {
             playerID = players[player.id].id;
-            playerName = player.username;
         } else {
-            client.api.interactions(interaction.id, interaction.token).callback.post({
-                data: {
-                    type: 4,
-                    data: {
-                        content: "No dotabuff registered for **" + player.username + "**!"
-                    }
-                }
-            });
+            interaction.reply("No dotabuff registerered for **" + player.username + "**!");
             return;
         }
     }
-    else if (subcommand == 'id') {
-        playerID = options[0].options[0].value;
-        playerName = playerID;
+    else if (interaction.options.getSubcommand() === 'id') {
+        playerID = interaction.options.getString('id');
     }
 
-    //var matches = await recentMatches(playerID);
+    await interaction.deferReply();
     opendota.recentMatches(playerID).then(function(matches) {
         if (matches.length)                             
         {
             var embeds = recentEmbed(matches.slice(0,5));
-            client.api.interactions(interaction.id, interaction.token).callback.post({
-                data: {
-                    type: 4,
-                    data: {
-                        content: "Recent matches for **" + playerName + "**",
-                        embeds: embeds,
-                    }
-                }
-            });
+            interaction.editReply({ content: "Recent matches for **" + player.username + "**", embeds: embeds, });
         } else {
-            client.api.interactions(interaction.id, interaction.token).callback.post({
-                data: {
-                    type: 4,
-                    data: {
-                        content: "OpenDota is not working, or something",
-                    }
-                }
-            });
+            interaction.editReply("OpenDota is not working, or something");
         }
     }).catch(function(err) {
         console.log(err);
