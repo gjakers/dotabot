@@ -45,8 +45,16 @@ const recentcommand = new SlashCommandBuilder()
 			.setDescription("Player's ID#")
 			.setRequired(true)
 		));
+const weeklyCommand = new SlashCommandBuilder()
+	.setName('weekly')
+	.setDescription("Weekly dota stats")
+	.addUserOption(option => option
+		.setName('username')
+		.setDescription("Player's name")
+		.setRequired(true)
+	)	
 
-const commands = [recentcommand, ];
+const commands = [recentcommand, weeklyCommand, ];
 const rest = new REST({ version: '9'}).setToken(process.env.DISCORD_SECRET_TOKEN);
 (async () => {
 	try {
@@ -63,6 +71,7 @@ client.login(process.env.DISCORD_SECRET_TOKEN);
 client.on("ready", async () => {
 	console.log("Start...");
 	client.user.setActivity('Shame Simulator 2');
+
 
 	/* GET/DELETE COMMANDS
 	 * Get guild commands
@@ -88,8 +97,12 @@ client.on('interactionCreate', async (interaction) => {
 			case 'recent':
 				dota.recent(interaction);
 				break;
+			case 'weekly':
+				dota.weekly(interaction);
+				break;
 			default:
 				console.log("Unknown command received!")
+				break;
 		}
 		return;
 	}
