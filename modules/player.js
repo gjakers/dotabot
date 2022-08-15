@@ -125,14 +125,14 @@ class Player {
 	}
 
 	async #pollNormal() {
-		var options = { date: '7', limit: '50', significant: '0'};
+		var options = { date: '7', limit: '200', significant: '0'};
 		return opendota.playerMatches(this.id, options).then(function(matches) {
 			return matches;
 		});
 	}
 
 	async #pollSpecial() {
-		var options = { date: '7', limit: '50', significant: '0', game_mode: '19'};
+		var options = { date: '7', limit: '200', significant: '0', game_mode: '19'};
 		return opendota.playerMatches(this.id, options).then(function(matches) {
 			return matches;
 		});
