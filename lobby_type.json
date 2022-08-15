@@ -52,8 +52,13 @@
     "balanced": true
   },
   "14": {
-    "id": 9,
+    "id": 14,
     "name": "New Player Mode",
+    "balanced": true
+  },
+  "15": {
+    "id": 15,
+    "name": "Colosseum",
     "balanced": true
   }
 }

@@ -53,6 +53,10 @@ function optionsString(options) {
 	return str;
 }
 
+async function getPlayer(id) {
+	return apiCall(`/players/${id}`);
+}
+
 async function recentMatches(id) {
 	return apiCall(`/players/${id}/recentMatches`);
 }
@@ -65,4 +69,8 @@ async function getMatch(id) {
 	return apiCall(`/matches/${id}`);
 }
 
-module.exports = { recentMatches, playerMatches, getMatch };
+async function playerWordcloud(id, options) {
+	return apiCall(`/players/${id}/wordcloud/` + optionsString(options));
+}
+
+module.exports = { recentMatches, playerMatches, getMatch, getPlayer, playerWordcloud, };
