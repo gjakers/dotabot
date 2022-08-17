@@ -171,7 +171,7 @@ async function readycheck(interaction) {
     readycheck_players = {};
     readycheck_in_progress = true;
     readycheck_user = interaction.user.username;
-    await interaction.deferReply()
+    await interaction.deferReply();
 
     var embed = new Discord.MessageEmbed()
         .setTitle("READY CHECK")

@@ -6,6 +6,7 @@ const client  = new Client({ intents: [Intents.FLAGS.GUILDS,
 						   });
 const dota = require('./modules/dota.js');
 const server = require('./modules/server.js');
+const movies = require('./modules/movies.js');
 
 
 const { REST } = require('@discordjs/rest');
@@ -60,8 +61,34 @@ const leaderboardCommand = new SlashCommandBuilder()
 const readycheckCommand = new SlashCommandBuilder()
 	.setName('readycheck')
 	.setDescription("Send a ready check to the server")
-
-
+const pollCommand = new SlashCommandBuilder()
+	.setName('pollmovie')
+	.setDescription("Create a poll to choose a movie")
+	.addStringOption(option => option
+		.setName('movie_1')
+		.setDescription("URL of movie's iMDB page")
+		.setRequired(false)	
+	)
+	.addStringOption(option => option
+		.setName('movie_2')
+		.setDescription("URL of movie's iMDB page")
+		.setRequired(false)	
+	)
+	.addStringOption(option => option
+		.setName('movie_3')
+		.setDescription("URL of movie's iMDB page")
+		.setRequired(false)	
+	)
+	.addStringOption(option => option
+		.setName('movie_4')
+		.setDescription("URL of movie's iMDB page")
+		.setRequired(false)	
+	)
+	.addStringOption(option => option
+		.setName('movie_5')
+		.setDescription("URL of movie's iMDB page")
+		.setRequired(false)	
+	)
 
 const commands = [recentcommand, weeklyCommand, readycheckCommand, ];
 const rest = new REST({ version: '9'}).setToken(process.env.DISCORD_SECRET_TOKEN);
@@ -73,7 +100,7 @@ const rest = new REST({ version: '9'}).setToken(process.env.DISCORD_SECRET_TOKEN
 		);
 		await rest.put(
 			Routes.applicationGuildCommands(clientId, guildId),
-			{body: [leaderboardCommand, ]}
+			{body: [leaderboardCommand, pollCommand]}
 		);
 	} catch (error) {
 		console.log(error);
@@ -99,7 +126,7 @@ client.on("ready", async () => {
 
 	client.guilds.fetch(guildId).then( guild => {
 		//list_members(guild);
-		server.judgement(guild);
+		//server.judgement(guild);
 	    setInterval(server.judgement, 3600000, guild);
 	});
 });
@@ -119,6 +146,9 @@ client.on('interactionCreate', async (interaction) => {
 			case 'readycheck':
 				server.readycheck(interaction);
 				break;
+			case 'pollmovie':
+				movies.pollmovie(interaction);
+				break;
 			default:
 				console.log("Unknown command received!");
 				break;
@@ -131,6 +161,13 @@ client.on('interactionCreate', async (interaction) => {
 			case 'ready':
 			case 'notready':
 				server.readycheckButtonpressed(interaction);
+				break;
+			case 'movie1':
+			case 'movie2':
+			case 'movie3':
+			case 'movie4':
+			case 'movie5':
+				movies.pollmovieButtonpressed(interaction);
 				break;
 			default:
 				console.log("Unkown button pressed!");
