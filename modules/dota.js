@@ -1,5 +1,5 @@
 const { match } = require("assert");
-const Discord = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 const fs = require('fs');
 const opendota = require('./opendota.js');
 const player = require('./player.js');
@@ -25,20 +25,28 @@ async function recent(interaction) {
         console.log("recent: " + user.username + " " + user.id );
 
         if(!players.hasOwnProperty(user.id)) {
-            interaction.editReply("No dotabuff registerered for **" + user.username + "**!");
+            interaction.editReply("No dotabuff registered for **" + user.username + "**!");
             return;
         }
         playerID = players[user.id].id;
     }
     else if (interaction.options.getSubcommand() === 'id') {
         playerID = interaction.options.getString('id');
+        console.log("recent: " + playerID );
     }
 
     opendota.recentMatches(playerID).then(function(matches) {
         if (matches.length)                             
         {
             var embeds = recentEmbed(matches.slice(0,5));
-            interaction.editReply({ content: "Recent matches for **" + user.username + "**", embeds: embeds, });
+            if(interaction.options.getSubcommand() === 'username'){
+                interaction.editReply({ content: "Recent matches for **" + user.username + "**", 
+                                    embeds: embeds, });
+            }
+            else if (interaction.options.getSubcommand() === 'id') {
+                interaction.editReply({ content: "Recent matches for **" + playerID + "**", 
+                                        embeds: embeds, });
+            }
         } else {
             interaction.editReply("OpenDota is not working, or something");
         }
@@ -50,12 +58,13 @@ async function recent(interaction) {
 function recentEmbed(matches) {
 	var embeds = [];
 	matches.forEach(function(match) {
+        console.log(match['hero_id'])
 		var hero = heroes[match['hero_id']];
 		var duration_minutes = Math.floor(match.duration/60);
 		var duration_seconds = String(match.duration % 60).padStart(2, '0');
 		var won = (match.player_slot < 128) === match.radiant_win;
 
-		var embed = new Discord.MessageEmbed()
+		var embed = new EmbedBuilder()
 			.setURL((match.game_mode === 18 ? " https://windrun.io/matches/" : "https://www.dotabuff.com/matches/") + match.match_id)
 			.setThumbnail(hero.image)
 			.addFields(
@@ -112,7 +121,7 @@ async function weekly(interaction) {
     opendota.playerMatches(playerID, { "date": 7, "significant": 0}).then(function(matches) {
         opendota.getPlayer(playerID).then(async function(player) {
             if(matches.length == 0) {
-                var nogames = new Discord.MessageEmbed()
+                var nogames = new EmbedBuilder()
                     .setTitle(user.username + "'s week in DotA 2")
                     .setURL("https://www.opendota.com/players/" + players[user.id].id + "/matches?date=7&significant=0")
                     .setThumbnail(player.profile.avatarmedium)
@@ -134,9 +143,9 @@ async function weekly(interaction) {
 }
 
 function weeklyStart(matches, user, player, stats) {
-    let mmr = (stats.ranked_won - stats.ranked_lost)*30;
+    let mmr = (stats.ranked_won - stats.ranked_lost);
     var embeds = [];
-    var header = new Discord.MessageEmbed()
+    var header = new EmbedBuilder()
         .setTitle(player.profile.personaname + "'s week in DotA 2")
         .setURL("https://www.opendota.com/players/" + players[user.id].id + "/matches?date=7&significant=0")
         .setThumbnail(player.profile.avatarmedium)
@@ -149,7 +158,7 @@ function weeklyStart(matches, user, player, stats) {
               value: '**' + (matches.length - stats.modes.ranked) + " Unranked**",
               inline: true,
             },
-            { name: "MMR change: " + (mmr > 0 ? "+" : "") + mmr ,
+            { name: "Ranked W/L: " + (mmr > 0 ? "+" : "") + mmr ,
               value: "**Rank: " + rankString(player.rank_tier) + '**',
               inline: true,
             },
@@ -176,17 +185,27 @@ function rankString(rank_tier) {
             case 4: medal = 'Archon ';   break;
             case 5: medal = 'Legend ';   break;
             case 6: medal = 'Ancient ';  break;
-            case 7: medal = 'Divine ';   break;
+            case 7: medal = 'Ancient ';   break;
             case 8: medal = 'Immortal';  break;
             default: medal = 'Unknown '; break;
         }
     let stars = '';
-    switch (rank_tier%10) {
-        case 1: stars =   'I'; break;
-        case 2: stars =  'II'; break;
-        case 3: stars = 'III'; break;
-        case 4: stars =  'IV'; break;
-        case 5: stars =   'V'; break;
+    if (Math.floor(rank_tier/10) == 7) {
+        switch (rank_tier%10) {
+            case 1: stars =   'VI'; break;
+            case 2: stars =  'VII'; break;
+            case 3: stars = 'VIII'; break;
+            case 4: stars =  'IX'; break;
+            case 5: stars =   'X'; break;
+        }
+    } else {
+        switch (rank_tier%10) {
+            case 1: stars =   'I'; break;
+            case 2: stars =  'II'; break;
+            case 3: stars = 'III'; break;
+            case 4: stars =  'IV'; break;
+            case 5: stars =   'V'; break;
+        }
     }
     return medal + stars;
 }

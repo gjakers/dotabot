@@ -19,7 +19,7 @@
   "dependencies": {
     "@discordjs/rest": "^0.5.0",
     "discord-api-types": "^0.35.0",
-    "discord.js": "^13.8.0",
+    "discord.js": "^14.3.0-dev.1660910640-e475b63.0",
     "dotenv": "^16.0.1",
     "request": "^2.88.2",
     "tweetnacl": "^1.0.3"

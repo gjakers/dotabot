@@ -1,4 +1,4 @@
-const Discord = require("discord.js");
+const {EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const player = require('./player.js');
 const fs = require('fs');
 
@@ -28,6 +28,8 @@ async function judgement(guild) {
                 }
             }
         });
+    }).catch(function(err) {
+        console.log(err);
     });
     let king_solvers = [];
     // Check everyone with dotabuff registered
@@ -147,7 +149,7 @@ async function leaderboard(interaction) {
         }
     });
 
-    var ranks = new Discord.MessageEmbed()
+    var ranks = new EmbedBuilder()
         .addFields(
             { name: ":crown: Weekly Leaderboard :crown:",
               value: str,
@@ -173,21 +175,21 @@ async function readycheck(interaction) {
     readycheck_user = interaction.user.username;
     await interaction.deferReply();
 
-    var embed = new Discord.MessageEmbed()
+    var embed = new EmbedBuilder()
         .setTitle("READY CHECK")
         .setDescription('**' + readycheck_user + "** requested a Ready Check.")
         .setColor('#a9cf54')
     
-    var row = new Discord.MessageActionRow()
+    var row = new ActionRowBuilder()
         .addComponents(
-            new Discord.MessageButton()
+            new ButtonBuilder()
                 .setCustomId('ready')
                 .setLabel('READY')
-                .setStyle('SUCCESS'),
-            new Discord.MessageButton()
+                .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
                 .setCustomId('notready')
                 .setLabel('NOT READY')
-                .setStyle("DANGER")
+                .setStyle(ButtonStyle.Danger)
         );
     interaction.editReply({ content: " ", embeds: [embed], components: [row]});
     setTimeout(() => { closeReadycheck(interaction) }, 90000);
@@ -207,7 +209,7 @@ function readycheckButtonpressed(interaction) {
         str += readycheck_players[player] ? 'Ready' : 'Not Ready';
         str += '\n';
     }
-    var embed = new Discord.MessageEmbed()
+    var embed = new EmbedBuilder()
         .setTitle("READY CHECK")
         .setDescription(str)
         .setColor('#a9cf54')
@@ -228,21 +230,21 @@ function closeReadycheck(interaction) {
         }
         str += "\n**Ready Check** complete."
     }
-    var embed = new Discord.MessageEmbed()
+    var embed = new EmbedBuilder()
         .setTitle("READY CHECK")
         .setDescription(str)
 
-    var row = new Discord.MessageActionRow()
+    var row = new ActionRowBuilder()
         .addComponents(
-            new Discord.MessageButton()
+            new ButtonBuilder()
                 .setCustomId('ready')
                 .setLabel('READY')
-                .setStyle('SUCCESS')
+                .setStyle(ButtonStyle.Success)
                 .setDisabled(true),
-            new Discord.MessageButton()
+            new ButtonBuilder()
                 .setCustomId('notready')
                 .setLabel('NOT READY')
-                .setStyle("DANGER")
+                .setStyle(ButtonStyle.Danger)
                 .setDisabled(true)
         );
         

@@ -1,74 +1,113 @@
 const Discord = require("discord.js");
+const { ModalBuilder, ActionRowBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const request = require('request');
 require('dotenv').config();
 
 async function pollmovie(interaction) {
-    interaction.reply("coming soon...");
-    return;
+    //  interaction.reply({content: "coming soon...", ephemeral: true});
+    //  return;
 
+    const modal = new ModalBuilder()
+        .setCustomId('pollmovieSubmit')
+        .setTitle('My Modal')
+
+    const moviesInput = new TextInputBuilder()
+        .setCustomId('moviesInput')
+        .setLabel("List of IMDb links to movies, one per line")
+        .setStyle(TextInputStyle.Paragraph)
+    
+    const actionRow = new ActionRowBuilder().addComponents(moviesInput);
+    modal.addComponents(actionRow);
+
+    await interaction.showModal(modal);
+}
+
+async function pollmovieModalReceived(interaction) {
     await interaction.deferReply();
-
-    let list = [];
-    list.push(
-        interaction.options.getString('movie_1'),
-        interaction.options.getString('movie_2'),
-        interaction.options.getString('movie_3'),
-        interaction.options.getString('movie_4'),
-        interaction.options.getString('movie_5')
-    );
-    
-    var row = new Discord.MessageActionRow();
-    let embeds = [];
-    let invalid = false;
-
+    const list = interaction.fields.getTextInputValue('moviesInput').split("\n");
+    let bad_entries = [];
+    let good_entries = [];
+    // First check for valid URLs
     for(var i=0; i<list.length; i++) {
-        console.log(list[i])
-        if(list[i] == null) { continue; }
-        let embed = await getTitle(list[i]).then( body => {
-            if (body.errorMessage) { invalid = true; return null; }
-            return movieEmbed(body);
-        })
-        if (invalid) {
-            interaction.editReply({
-                content: "One of your movie IDs was invalid: " + list[i] + "",
-                ephemeral: true,
-            });
-            return;
+        if(list[i].trim() === '') continue;
+        if(!list[i].startsWith("https://www.imdb.com/title/")) {
+            bad_entries.push(list[i]);
+        } else {
+            good_entries.push(list[i]);
         }
-
-        embeds.push(embed);
-        row.addComponents(
-            new Discord.MessageButton()
-                .setCustomId('movie' + (i + 1))
-                .setLabel(embed.title)
-                .setStyle('PRIMARY')
-        )
     }
-    
-    interaction.editReply({ embeds: embeds, components: [row]});
+
+    // If any invalid URLs found, send error message
+    if(bad_entries.length) {
+        let msg = "idiot!!\nThe following could not be read as valid IMDb URLs:\n";
+        msg += "```\n";
+        bad_entries.forEach(entry => {
+            msg += entry + "\n";
+        });
+        msg += "```";
+        msg += "URL should look like: `https://www.imdb.com/title/tt0116151/`";
+        interaction.editReply({ content: msg, ephemeral: true });
+        return;
+    }
+    // If no movies were listed, send error message
+    if(good_entries.length === 0) {
+        interaction.editReply({ content: "You didn't list any movies bruv", ephemeral: true});
+        return;
+    }
+
+    var row = new ActionRowBuilder();
+    let embeds = [];
+    for (var i=0; i<good_entries.length; i++) {
+        let id =  good_entries[i].match(/imdb.com\/title\/([a-zA-Z0-9]+)/)[1];
+        let embed = await getTitle(id).then( body => {
+            row.addComponents(
+                new ButtonBuilder()
+                    .setCustomId('movie' + (i+1))
+                    .setLabel(body.title)
+                    .setStyle(ButtonStyle.Success)
+            );
+            return movieEmbed(body);
+        });
+        embeds.push(embed) 
+    }
+    var results_embed = new EmbedBuilder()
+        .setTitle("POLL RESULTS")
+        .addFields()
+    let test = await interaction.editReply({embeds: embeds, components: [row]});
 }
 
 function movieEmbed(movie) {
-    var embed = new Discord.MessageEmbed()
-        .setTitle(movie.title)
-        .setURL("https://www.imdb.com/title/" + movie.id)
+    var embed = new EmbedBuilder()
+        .setTitle(movie.title + " (" + movie.year + " · " + movie.runtimeStr + ")")
+        .setURL("https://www.imdb.com/title/" + movie.id + "?")
         .setThumbnail(movie.image)
         .addFields(
-            { name: movie.year + " · " + movie.runtimeStr + " · ☆" + movie.imDbRating + "/10",
+            { name: movie.stars + " · " + movie.imDbRating + "/10☆",
               value: movie.plot,
               inline: false
-            },
-            { name: movie.stars,
-              value: movie.genres
             },
         )
     return embed;
 }
 
 function pollmovieButtonpressed(interaction) {
-    console.log(interaction.customId + ' ' + interaction.user.username)
-    console.log(interaction)
+    var embeds = interaction.message.embeds;
+
+    let i = parseInt(interaction.customId.charAt(interaction.customId.length-1))-1;
+    //Check if already voted
+    console.log(embeds[i].data.url)
+    if(!embeds[i].data.url.includes(interaction.user.id + ','))
+    {
+        embeds[i].data.title += ":orangutan:";
+        embeds[i].data.url += interaction.user.id + ',';
+    }
+    interaction.update({embeds: embeds, components: interaction.message.components})
 }
+
+function whoVoted(embeds) {
+
+}
+
 
 
 const default_headers = {'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) " +
@@ -120,6 +159,4 @@ async function getTitle(id) {
 }
 
 
-
-
-module.exports = {pollmovie, pollmovieButtonpressed };
+module.exports = {pollmovie, pollmovieButtonpressed, pollmovieModalReceived };

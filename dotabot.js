@@ -1,8 +1,8 @@
-const {Client, Intents } = require("discord.js");
+const {Client, GatewayIntentBits } = require("discord.js");
 require('dotenv').config();
-const client  = new Client({ intents: [Intents.FLAGS.GUILDS,
-									   Intents.FLAGS.GUILD_MESSAGES,
-									   Intents.FLAGS.GUILD_MEMBERS]
+const client  = new Client({ intents: [GatewayIntentBits.Guilds,
+									   GatewayIntentBits.GuildMessages,
+									   GatewayIntentBits.GuildMembers]
 						   });
 const dota = require('./modules/dota.js');
 const server = require('./modules/server.js');
@@ -64,33 +64,9 @@ const readycheckCommand = new SlashCommandBuilder()
 const pollCommand = new SlashCommandBuilder()
 	.setName('pollmovie')
 	.setDescription("Create a poll to choose a movie")
-	.addStringOption(option => option
-		.setName('movie_1')
-		.setDescription("URL of movie's iMDB page")
-		.setRequired(false)	
-	)
-	.addStringOption(option => option
-		.setName('movie_2')
-		.setDescription("URL of movie's iMDB page")
-		.setRequired(false)	
-	)
-	.addStringOption(option => option
-		.setName('movie_3')
-		.setDescription("URL of movie's iMDB page")
-		.setRequired(false)	
-	)
-	.addStringOption(option => option
-		.setName('movie_4')
-		.setDescription("URL of movie's iMDB page")
-		.setRequired(false)	
-	)
-	.addStringOption(option => option
-		.setName('movie_5')
-		.setDescription("URL of movie's iMDB page")
-		.setRequired(false)	
-	)
 
-const commands = [recentcommand, weeklyCommand, readycheckCommand, ];
+
+const commands = [recentcommand, weeklyCommand, readycheckCommand, pollCommand];
 const rest = new REST({ version: '9'}).setToken(process.env.DISCORD_SECRET_TOKEN);
 (async () => {
 	try {
@@ -100,7 +76,7 @@ const rest = new REST({ version: '9'}).setToken(process.env.DISCORD_SECRET_TOKEN
 		);
 		await rest.put(
 			Routes.applicationGuildCommands(clientId, guildId),
-			{body: [leaderboardCommand, pollCommand]}
+			{body: [leaderboardCommand, ]}
 		);
 	} catch (error) {
 		console.log(error);
@@ -112,6 +88,8 @@ client.on("ready", async () => {
 	console.log("Start...");
 	client.user.setActivity('Shame Simulator 2');
 	//client.channels.cache.get('855981690365935657').send("thx");
+	//client.channels.cache.get('855981690365935657').fetchMessage('1013961996540059778').then(msg => msg.delete())
+
 
 	/* GET/DELETE COMMANDS
 	 * Get guild commands
@@ -125,14 +103,29 @@ client.on("ready", async () => {
 	 */
 
 	client.guilds.fetch(guildId).then( guild => {
+		// guild.channels.create( {
+		// 	name: "forum",
+		// 	type: 15,
+		// })
 		//list_members(guild);
 		//server.judgement(guild);
 	    setInterval(server.judgement, 3600000, guild);
+		
+	}).catch(function(err) {
+		console.log(err);
 	});
 });
 
 client.on('interactionCreate', async (interaction) => {
+	//interaction.reply({content: "slash commands down for maintenance", ephemeral: true});
 	if(interaction.isCommand()) {
+		// if (interaction.user.id === "287781427733331968") {
+		// 	if ((interaction.commandName === 'recent') || (interaction.commandName === 'weekly')) {
+		// 		interaction.reply({content: "This user has been banned for violating usage policy: Toxic use of bot commands." })
+		// 		return;
+		// 	}
+		// }
+		// "Content Guidelines Update: Users
 		switch(interaction.commandName) {
 			case 'recent':
 				dota.recent(interaction);
@@ -171,6 +164,18 @@ client.on('interactionCreate', async (interaction) => {
 				break;
 			default:
 				console.log("Unkown button pressed!");
+				break;
+		}
+		return;
+	}
+
+	if(interaction.isModalSubmit()) {
+		switch(interaction.customId){
+			case 'pollmovieSubmit':
+				movies.pollmovieModalReceived(interaction);
+				break;
+			default:
+				console.log("Unknown modal recieved!");
 				break;
 		}
 		return;
