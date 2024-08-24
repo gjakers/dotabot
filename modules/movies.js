@@ -4,8 +4,8 @@ const request = require('request');
 require('dotenv').config();
 
 async function pollmovie(interaction) {
-    //  interaction.reply({content: "coming soon...", ephemeral: true});
-    //  return;
+    interaction.reply({content: "pollmovie is currently out of order!!!", ephemeral: true});
+    return;
 
     const modal = new ModalBuilder()
         .setCustomId('pollmovieSubmit')
@@ -59,7 +59,11 @@ async function pollmovieModalReceived(interaction) {
     let embeds = [];
     for (var i=0; i<good_entries.length; i++) {
         let id =  good_entries[i].match(/imdb.com\/title\/([a-zA-Z0-9]+)/)[1];
+        console.log(id)
         let embed = await getTitle(id).then( body => {
+            console.log(body)
+            console.log("~~~~")
+            console.log(body.title)
             row.addComponents(
                 new ButtonBuilder()
                     .setCustomId('movie' + (i+1))

@@ -7,7 +7,7 @@ const client  = new Client({ intents: [GatewayIntentBits.Guilds,
 const dota = require('./modules/dota.js');
 const server = require('./modules/server.js');
 const movies = require('./modules/movies.js');
-
+const readycheck = require('./modules/readycheck.js');
 
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
@@ -65,7 +65,6 @@ const pollCommand = new SlashCommandBuilder()
 	.setName('pollmovie')
 	.setDescription("Create a poll to choose a movie")
 
-
 const commands = [recentcommand, weeklyCommand, readycheckCommand, pollCommand];
 const rest = new REST({ version: '9'}).setToken(process.env.DISCORD_SECRET_TOKEN);
 (async () => {
@@ -87,7 +86,7 @@ client.login(process.env.DISCORD_SECRET_TOKEN);
 client.on("ready", async () => {
 	console.log("Start...");
 	client.user.setActivity('Shame Simulator 2');
-	//client.channels.cache.get('855981690365935657').send("thx");
+	//client.channels.cache.get('755578121280946226').send("Approved.");
 	//client.channels.cache.get('855981690365935657').fetchMessage('1013961996540059778').then(msg => msg.delete())
 
 
@@ -108,7 +107,7 @@ client.on("ready", async () => {
 		// 	type: 15,
 		// })
 		//list_members(guild);
-		//server.judgement(guild);
+		server.judgement(guild);
 	    setInterval(server.judgement, 3600000, guild);
 		
 	}).catch(function(err) {
@@ -119,13 +118,6 @@ client.on("ready", async () => {
 client.on('interactionCreate', async (interaction) => {
 	//interaction.reply({content: "slash commands down for maintenance", ephemeral: true});
 	if(interaction.isCommand()) {
-		// if (interaction.user.id === "287781427733331968") {
-		// 	if ((interaction.commandName === 'recent') || (interaction.commandName === 'weekly')) {
-		// 		interaction.reply({content: "This user has been banned for violating usage policy: Toxic use of bot commands." })
-		// 		return;
-		// 	}
-		// }
-		// "Content Guidelines Update: Users
 		switch(interaction.commandName) {
 			case 'recent':
 				dota.recent(interaction);
@@ -137,7 +129,7 @@ client.on('interactionCreate', async (interaction) => {
 				server.leaderboard(interaction);
 				break;
 			case 'readycheck':
-				server.readycheck(interaction);
+				readycheck.readycheck(interaction);
 				break;
 			case 'pollmovie':
 				movies.pollmovie(interaction);
@@ -153,7 +145,7 @@ client.on('interactionCreate', async (interaction) => {
 		switch(interaction.customId) {
 			case 'ready':
 			case 'notready':
-				server.readycheckButtonpressed(interaction);
+				readycheck.readycheckButtonpressed(interaction);
 				break;
 			case 'movie1':
 			case 'movie2':

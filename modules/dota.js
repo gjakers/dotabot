@@ -1,12 +1,30 @@
 const { match } = require("assert");
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, Emoji, GuildEmoji } = require("discord.js");
 const fs = require('fs');
 const opendota = require('./opendota.js');
 const player = require('./player.js');
 
 // Load hero data
-let raw_heroes = fs.readFileSync('./hero-images.json');
-let heroes = JSON.parse(raw_heroes);
+let heroes = {};
+fs.readFile('./hero-images.json', 'utf8', (err, data) => {
+    if (err) {
+        console.error("Error reading file:", err);
+        return;
+    }
+    //Remove BOM
+    if (data.charCodeAt(0) === 0xFEFF) {
+        data = data.slice(1);
+    }
+
+    try {
+        heroes = JSON.parse(data);
+    } catch (jsonError) {
+        console.error('Error parsing JSON:', jsonError);
+        return;
+    }
+});
+
+
 // Load lobbytype data
 let raw_lobbies = fs.readFileSync('./lobby_type.json');
 let lobbies = JSON.parse(raw_lobbies);
@@ -58,7 +76,7 @@ async function recent(interaction) {
 function recentEmbed(matches) {
 	var embeds = [];
 	matches.forEach(function(match) {
-        console.log(match['hero_id'])
+        console.log(match['hero_id']);
 		var hero = heroes[match['hero_id']];
 		var duration_minutes = Math.floor(match.duration/60);
 		var duration_seconds = String(match.duration % 60).padStart(2, '0');
@@ -185,27 +203,17 @@ function rankString(rank_tier) {
             case 4: medal = 'Archon ';   break;
             case 5: medal = 'Legend ';   break;
             case 6: medal = 'Ancient ';  break;
-            case 7: medal = 'Ancient ';   break;
-            case 8: medal = 'Immortal';  break;
+            case 7: medal = 'Divine ';   break;
+            case 8: medal = 'Immortal ';  break;
             default: medal = 'Unknown '; break;
         }
     let stars = '';
-    if (Math.floor(rank_tier/10) == 7) {
-        switch (rank_tier%10) {
-            case 1: stars =   'VI'; break;
-            case 2: stars =  'VII'; break;
-            case 3: stars = 'VIII'; break;
-            case 4: stars =  'IX'; break;
-            case 5: stars =   'X'; break;
-        }
-    } else {
-        switch (rank_tier%10) {
-            case 1: stars =   'I'; break;
-            case 2: stars =  'II'; break;
-            case 3: stars = 'III'; break;
-            case 4: stars =  'IV'; break;
-            case 5: stars =   'V'; break;
-        }
+    switch (rank_tier%10) {
+        case 1: stars =   'I'; break;
+        case 2: stars =  'II'; break;
+        case 3: stars = 'III'; break;
+        case 4: stars =  'IV'; break;
+        case 5: stars =   'V'; break;
     }
     return medal + stars;
 }
@@ -270,5 +278,4 @@ function weeklyStats(matches) {
     });    
     return stats;
 }
-
 module.exports = {recent, weekly, };
