@@ -15,7 +15,7 @@ for hero_id_obj in hero_id_objs["heroes"]:
 
 heroes_dict = {}
 for url in image_urls:
-    hero_name = re.search("\/assets\/heroes\/(.{1,23})-", url).group(1)
+    hero_name = re.search("\/assets\/heroes\/(.+?)\.", url).group(1)
     hero_obj = name_to_obj[hero_name]
     heroes_dict[str(hero_obj["id"])] = {
         "id": hero_obj["id"],

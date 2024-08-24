@@ -609,7 +609,18 @@
             "name": "marci",
             "id": 136,
             "localized-name": "Marci"
-        }
+        },
+	{
+	    "name": "primal-beast",
+	    "id": 137,
+            "localized-name": "Primal Beast"
+	},
+	{
+	    "name": "muerta",
+	    "id": 138,
+            "localized-name": "Muerta"
+	}
+
     ]
 }
 

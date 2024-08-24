@@ -1,12 +1,13 @@
-const {Client, Intents } = require("discord.js");
+const {Client, GatewayIntentBits } = require("discord.js");
 require('dotenv').config();
-const client  = new Client({ intents: [Intents.FLAGS.GUILDS,
-									   Intents.FLAGS.GUILD_MESSAGES,
-									   Intents.FLAGS.GUILD_MEMBERS]
+const client  = new Client({ intents: [GatewayIntentBits.Guilds,
+									   GatewayIntentBits.GuildMessages,
+									   GatewayIntentBits.GuildMembers]
 						   });
 const dota = require('./modules/dota.js');
 const server = require('./modules/server.js');
-
+const movies = require('./modules/movies.js');
+const readycheck = require('./modules/readycheck.js');
 
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
@@ -60,10 +61,11 @@ const leaderboardCommand = new SlashCommandBuilder()
 const readycheckCommand = new SlashCommandBuilder()
 	.setName('readycheck')
 	.setDescription("Send a ready check to the server")
+const pollCommand = new SlashCommandBuilder()
+	.setName('pollmovie')
+	.setDescription("Create a poll to choose a movie")
 
-
-
-const commands = [recentcommand, weeklyCommand, readycheckCommand, ];
+const commands = [recentcommand, weeklyCommand, readycheckCommand, pollCommand];
 const rest = new REST({ version: '9'}).setToken(process.env.DISCORD_SECRET_TOKEN);
 (async () => {
 	try {
@@ -84,7 +86,9 @@ client.login(process.env.DISCORD_SECRET_TOKEN);
 client.on("ready", async () => {
 	console.log("Start...");
 	client.user.setActivity('Shame Simulator 2');
-	//client.channels.cache.get('855981690365935657').send("thx");
+	//client.channels.cache.get('755578121280946226').send("Approved.");
+	//client.channels.cache.get('855981690365935657').fetchMessage('1013961996540059778').then(msg => msg.delete())
+
 
 	/* GET/DELETE COMMANDS
 	 * Get guild commands
@@ -98,13 +102,21 @@ client.on("ready", async () => {
 	 */
 
 	client.guilds.fetch(guildId).then( guild => {
+		// guild.channels.create( {
+		// 	name: "forum",
+		// 	type: 15,
+		// })
 		//list_members(guild);
 		server.judgement(guild);
 	    setInterval(server.judgement, 3600000, guild);
+		
+	}).catch(function(err) {
+		console.log(err);
 	});
 });
 
 client.on('interactionCreate', async (interaction) => {
+	//interaction.reply({content: "slash commands down for maintenance", ephemeral: true});
 	if(interaction.isCommand()) {
 		switch(interaction.commandName) {
 			case 'recent':
@@ -117,7 +129,10 @@ client.on('interactionCreate', async (interaction) => {
 				server.leaderboard(interaction);
 				break;
 			case 'readycheck':
-				server.readycheck(interaction);
+				readycheck.readycheck(interaction);
+				break;
+			case 'pollmovie':
+				movies.pollmovie(interaction);
 				break;
 			default:
 				console.log("Unknown command received!");
@@ -130,10 +145,29 @@ client.on('interactionCreate', async (interaction) => {
 		switch(interaction.customId) {
 			case 'ready':
 			case 'notready':
-				server.readycheckButtonpressed(interaction);
+				readycheck.readycheckButtonpressed(interaction);
+				break;
+			case 'movie1':
+			case 'movie2':
+			case 'movie3':
+			case 'movie4':
+			case 'movie5':
+				movies.pollmovieButtonpressed(interaction);
 				break;
 			default:
 				console.log("Unkown button pressed!");
+				break;
+		}
+		return;
+	}
+
+	if(interaction.isModalSubmit()) {
+		switch(interaction.customId){
+			case 'pollmovieSubmit':
+				movies.pollmovieModalReceived(interaction);
+				break;
+			default:
+				console.log("Unknown modal recieved!");
 				break;
 		}
 		return;

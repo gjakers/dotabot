@@ -19,10 +19,14 @@ async function apiCall(cmd, tries = 0) {
 	}
 
 	nextCall = Date.now() + 1100;
+
 	return new Promise ((resolve, reject) => {
+		//process.stdout.write(tries + " ")
 		request(options, function(err, response, body) {
 			if (err) {
+				console.log(body)
 				if (tries > 5) {
+					console.log("5 tries...rejecting")
 				 	return reject(err);
 				}
 				else {
@@ -37,7 +41,7 @@ async function apiCall(cmd, tries = 0) {
 				} else {
 					resolve(parsed_body);
 				}
-			} catch(e) {
+			} catch(err) {
 				console.log("Opendota API failed: \n" + cmd + '\n');
 				resolve('');
 			}
