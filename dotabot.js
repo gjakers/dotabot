@@ -1,11 +1,13 @@
-const {Client, Intents } = require("discord.js");
+const {Client, GatewayIntentBits } = require("discord.js");
 require('dotenv').config();
-const client  = new Client({ intents: [Intents.FLAGS.GUILDS,
-									   Intents.FLAGS.GUILD_MESSAGES,
-									   Intents.FLAGS.GUILD_MEMBERS]
+const client  = new Client({ intents: [GatewayIntentBits.Guilds,
+									   GatewayIntentBits.GuildMembers,
+									   GatewayIntentBits.GuildMessages]
 						   });
-const dota = require('./modules/dota.js');
+const recent = require('./modules/recent.js');
+const weekly = require('./modules/weekly.js');
 const server = require('./modules/server.js');
+const readycheck = require('./modules/readycheck.js');
 
 
 const { REST } = require('@discordjs/rest');
@@ -108,16 +110,16 @@ client.on('interactionCreate', async (interaction) => {
 	if(interaction.isCommand()) {
 		switch(interaction.commandName) {
 			case 'recent':
-				dota.recent(interaction);
+				recent.recent(interaction);
 				break;
 			case 'weekly':
-				dota.weekly(interaction);
+				weekly.weekly(interaction);
 				break;
 			case 'leaderboard':
 				server.leaderboard(interaction);
 				break;
 			case 'readycheck':
-				server.readycheck(interaction);
+				readycheck.readycheck(interaction);
 				break;
 			default:
 				console.log("Unknown command received!");
@@ -130,7 +132,7 @@ client.on('interactionCreate', async (interaction) => {
 		switch(interaction.customId) {
 			case 'ready':
 			case 'notready':
-				server.readycheckButtonpressed(interaction);
+				readycheck.readycheckButtonpressed(interaction);
 				break;
 			default:
 				console.log("Unkown button pressed!");
