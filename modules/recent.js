@@ -51,7 +51,6 @@ async function recent(interaction) {
 function recentEmbed(matches) {
 	var embeds = [];
 	matches.forEach(function(match) {
-        console.log(match['hero_id']);
 		var hero = objects.heroes[match['hero_id']];
 		var duration_minutes = Math.floor(match.duration/60);
 		var duration_seconds = String(match.duration % 60).padStart(2, '0');

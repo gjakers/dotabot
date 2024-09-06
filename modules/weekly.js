@@ -7,7 +7,6 @@ const { EmbedBuilder, } = require("discord.js");
 const opendota = require('./opendota.js');
 
 const objects = require('./objects.js');
-
 // WEEKLY command
 async function weekly(interaction) {
     await interaction.deferReply();
