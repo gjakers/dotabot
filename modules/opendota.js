@@ -1,3 +1,9 @@
+/**
+ * @file opendota.js
+ * 
+ * @description Contains code for making OpenDOTA API calls
+ */
+
 const request = require('request');
 
 const default_headers = {'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) " +

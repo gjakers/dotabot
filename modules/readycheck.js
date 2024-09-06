@@ -1,3 +1,9 @@
+/**
+ * @file readycheck.js
+ * 
+ * @description Contains "/readycheck" command and associated functions
+ */
+
 const {EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const player = require('./player.js');
 const fs = require('fs');

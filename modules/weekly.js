@@ -1,126 +1,12 @@
-const { match } = require("assert");
-const { EmbedBuilder, Emoji, GuildEmoji } = require("discord.js");
-const fs = require('fs');
+/**
+ * @file weekly.js
+ * 
+ * @description Contains "/weekly" command and associated functions
+ */
+const { EmbedBuilder, } = require("discord.js");
 const opendota = require('./opendota.js');
-const player = require('./player.js');
 
-// Load hero data
-let heroes = {};
-fs.readFile('./hero-images.json', 'utf8', (err, data) => {
-    if (err) {
-        console.error("Error reading file:", err);
-        return;
-    }
-    //Remove BOM
-    if (data.charCodeAt(0) === 0xFEFF) {
-        data = data.slice(1);
-    }
-
-    try {
-        heroes = JSON.parse(data);
-    } catch (jsonError) {
-        console.error('Error parsing JSON:', jsonError);
-        return;
-    }
-});
-
-
-// Load lobbytype data
-let raw_lobbies = fs.readFileSync('./lobby_type.json');
-let lobbies = JSON.parse(raw_lobbies);
-// Load player data
-let raw_players = fs.readFileSync('./players.json');
-let players = JSON.parse(raw_players);
-
-
-// RECENT command
-async function recent(interaction) {
-    await interaction.deferReply();
-    var playerID = '';
-
-    if(interaction.options.getSubcommand() === 'username') {
-        var user = interaction.options.getUser('username');
-        console.log("recent: " + user.username + " " + user.id );
-
-        if(!players.hasOwnProperty(user.id)) {
-            interaction.editReply("No dotabuff registered for **" + user.username + "**!");
-            return;
-        }
-        playerID = players[user.id].id;
-    }
-    else if (interaction.options.getSubcommand() === 'id') {
-        playerID = interaction.options.getString('id');
-        console.log("recent: " + playerID );
-    }
-
-    opendota.recentMatches(playerID).then(function(matches) {
-        if (matches.length)                             
-        {
-            var embeds = recentEmbed(matches.slice(0,5));
-            if(interaction.options.getSubcommand() === 'username'){
-                interaction.editReply({ content: "Recent matches for **" + user.username + "**", 
-                                    embeds: embeds, });
-            }
-            else if (interaction.options.getSubcommand() === 'id') {
-                interaction.editReply({ content: "Recent matches for **" + playerID + "**", 
-                                        embeds: embeds, });
-            }
-        } else {
-            interaction.editReply("OpenDota is not working, or something");
-        }
-    }).catch(function(err) {
-        console.log(err);
-    });
-}
-
-function recentEmbed(matches) {
-	var embeds = [];
-	matches.forEach(function(match) {
-        console.log(match['hero_id']);
-		var hero = heroes[match['hero_id']];
-		var duration_minutes = Math.floor(match.duration/60);
-		var duration_seconds = String(match.duration % 60).padStart(2, '0');
-		var won = (match.player_slot < 128) === match.radiant_win;
-
-		var embed = new EmbedBuilder()
-			.setURL((match.game_mode === 18 ? " https://windrun.io/matches/" : "https://www.dotabuff.com/matches/") + match.match_id)
-			.setThumbnail(hero.image)
-			.addFields(
-				{ name: hero.name,
-				  value: '[`' + (timeAgo(match.start_time + match.duration) + " ago").toString().padEnd(17, " ") + "`](" + 
-                    (match.game_mode === 18 ? " https://windrun.io/matches/" : "https://www.dotabuff.com/matches/") + match.match_id + ")",
-				  inline: true
-				},
-				{ name: match.game_mode === 18 ? "Ability Draft" :
-                        ((lobbies[match.lobby_type]) ? lobbies[match.lobby_type].name : "Unknown" ).padEnd(11),
-				  value: '`'+ ("KDA " + match.kills + '/' + match.deaths + '/' + match.assists).padEnd(12, " ") + '`',
-				  inline: true
-				},
-				{ name: ((match.party_size > 1) ? (":busts_in_silhouette:x" + match.party_size) : "Solo").padEnd(12),
-				  value: '`'+ ("Duration " + duration_minutes + ":" + duration_seconds).padEnd(15, " ") +'`',
-				  inline: true
-				},
-			)
-			.setColor(won ? '#a9cf54' : '#c23c2a' )
-		embeds.push(embed);
-	});
-	return embeds;
-}
-
-function timeAgo(seconds) {
-	let time_since = (Date.now() - new Date(seconds * 1000))/60000; //convert to minutes
-	var unit = "minute";
-	if(time_since >= 1440) {
-		time_since /= 1440;
-		unit = "day";
-	}
-	else if(time_since >= 60) {
-		time_since /= 60;
-		unit = "hour";
-	}
-	return Math.floor(time_since).toString() + " " + unit + ((Math.floor(time_since) > 1) ? "s" : "");
-}
-
+const objects = require('./objects.js');
 
 // WEEKLY command
 async function weekly(interaction) {
@@ -129,19 +15,19 @@ async function weekly(interaction) {
 
     console.log("weekly: " + user.username + " " + user.id );
 
-    if(!players.hasOwnProperty(user.id)) {
+    if(!objects.players.hasOwnProperty(user.id)) {
         interaction.editReply("No dotabuff registerered for **" + user.username + "**!");
         return;
     }
 
-    var playerID = players[user.id].id;
+    var playerID = objects.players[user.id].id;
 
     opendota.playerMatches(playerID, { "date": 7, "significant": 0}).then(function(matches) {
         opendota.getPlayer(playerID).then(async function(player) {
             if(matches.length == 0) {
                 var nogames = new EmbedBuilder()
                     .setTitle(user.username + "'s week in DotA 2")
-                    .setURL("https://www.opendota.com/players/" + players[user.id].id + "/matches?date=7&significant=0")
+                    .setURL("https://www.opendota.com/players/" + objects.players[user.id].id + "/matches?date=7&significant=0")
                     .setThumbnail(player.profile.avatarmedium)
                     .setFooter({text: "They didn't play! Sad!", iconURL: "https://static.wikia.nocookie.net/dota2_gamepedia/images/1/17/Emoticon_sick.gif"})
 
@@ -165,7 +51,7 @@ function weeklyStart(matches, user, player, stats) {
     var embeds = [];
     var header = new EmbedBuilder()
         .setTitle(player.profile.personaname + "'s week in DotA 2")
-        .setURL("https://www.opendota.com/players/" + players[user.id].id + "/matches?date=7&significant=0")
+        .setURL("https://www.opendota.com/players/" + objects.players[user.id].id + "/matches?date=7&significant=0")
         .setThumbnail(player.profile.avatarmedium)
         .addFields(
             { name: matches.length + ((matches.length === '1') ? " Match" : " Matches"),
@@ -229,7 +115,7 @@ function heroesString(list) {
     arr.forEach((elem) => {
         string += '[0;';
         string += (elem.won == elem.lost) ? '33' : ((elem.won > elem.lost) ?  '32' : '31');
-        hero = heroes[elem.id];
+        hero = objects.heroes[elem.id];
         string += 'm' + hero.name + ' ' + elem.won + '-' + elem.lost + '\n';
     });
     string += "```"
@@ -278,4 +164,4 @@ function weeklyStats(matches) {
     });    
     return stats;
 }
-module.exports = {recent, weekly, };
+module.exports = {weekly, };

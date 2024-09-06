@@ -1,15 +1,19 @@
+/**
+ * @file server.js
+ * 
+ * @description Contains server management functions and "/leaderboard" command
+ * judgement - check user's match histories and assign roles accordingly
+ * leaderboard - show weekly match count of every user
+ */
+
 const {EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const player = require('./player.js');
-const fs = require('fs');
-
-// Load player data
-let raw_players = fs.readFileSync('./players.json');
-let players = JSON.parse(raw_players);
+const objects = require('./objects.js');
 
 let rankings = [];
 var last_checked = new Date();
 
-
+// JUDGEMENT
 async function judgement(guild) {
     rankings = [];
     var today = new Date();
@@ -19,7 +23,7 @@ async function judgement(guild) {
         members.forEach(member => {
             if(member.roles.cache.find( role => { 
                     return (role.name === 'dota' || role.name === 'thin ice' || role.name === 'scum')})) {
-                if(!players.hasOwnProperty(member.id)) {
+                if(!objects.players.hasOwnProperty(member.id)) {
                     let gamer = new player.Player(member.id);
                     console.log("BANNED: " + member.user.username);
                     gamer.removeRole(guild, 'dota');
@@ -33,7 +37,7 @@ async function judgement(guild) {
     });
     let king_solvers = [];
     // Check everyone with dotabuff registered
-    for (var discord in players) {
+    for (var discord in objects.players) {
         let gamer = new player.Player(discord);
         let king_solver = gamer.exists(guild).then(async function(exists_in_server) {
             if (exists_in_server) {

@@ -1,12 +1,18 @@
+/**
+ * @file dotabot.js
+ * 
+ * @description Entry point to dotabot Discord bot
+ */
+
 const {Client, GatewayIntentBits } = require("discord.js");
 require('dotenv').config();
 const client  = new Client({ intents: [GatewayIntentBits.Guilds,
 									   GatewayIntentBits.GuildMessages,
 									   GatewayIntentBits.GuildMembers]
 						   });
-const dota = require('./modules/dota.js');
+const recent = require('./modules/recent.js');
+const weekly = require ('./modules/weekly.js');
 const server = require('./modules/server.js');
-const movies = require('./modules/movies.js');
 const readycheck = require('./modules/readycheck.js');
 
 const { REST } = require('@discordjs/rest');
@@ -61,11 +67,8 @@ const leaderboardCommand = new SlashCommandBuilder()
 const readycheckCommand = new SlashCommandBuilder()
 	.setName('readycheck')
 	.setDescription("Send a ready check to the server")
-const pollCommand = new SlashCommandBuilder()
-	.setName('pollmovie')
-	.setDescription("Create a poll to choose a movie")
 
-const commands = [recentcommand, weeklyCommand, readycheckCommand, pollCommand];
+const commands = [recentcommand, weeklyCommand, readycheckCommand, ];
 const rest = new REST({ version: '9'}).setToken(process.env.DISCORD_SECRET_TOKEN);
 (async () => {
 	try {
@@ -120,19 +123,16 @@ client.on('interactionCreate', async (interaction) => {
 	if(interaction.isCommand()) {
 		switch(interaction.commandName) {
 			case 'recent':
-				dota.recent(interaction);
+				recent.recent(interaction);
 				break;
 			case 'weekly':
-				dota.weekly(interaction);
+				weekly.weekly(interaction);
 				break;
 			case 'leaderboard':
 				server.leaderboard(interaction);
 				break;
 			case 'readycheck':
 				readycheck.readycheck(interaction);
-				break;
-			case 'pollmovie':
-				movies.pollmovie(interaction);
 				break;
 			default:
 				console.log("Unknown command received!");
@@ -147,13 +147,6 @@ client.on('interactionCreate', async (interaction) => {
 			case 'notready':
 				readycheck.readycheckButtonpressed(interaction);
 				break;
-			case 'movie1':
-			case 'movie2':
-			case 'movie3':
-			case 'movie4':
-			case 'movie5':
-				movies.pollmovieButtonpressed(interaction);
-				break;
 			default:
 				console.log("Unkown button pressed!");
 				break;
@@ -163,9 +156,6 @@ client.on('interactionCreate', async (interaction) => {
 
 	if(interaction.isModalSubmit()) {
 		switch(interaction.customId){
-			case 'pollmovieSubmit':
-				movies.pollmovieModalReceived(interaction);
-				break;
 			default:
 				console.log("Unknown modal recieved!");
 				break;

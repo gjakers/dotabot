@@ -1,3 +1,9 @@
+/**
+ * @file player.js
+ * 
+ * @description Defines Player class, containing player's information and methods to fetch match data
+ */
+
 const fs = require('fs');
 
 const opendota = require('./opendota.js');
