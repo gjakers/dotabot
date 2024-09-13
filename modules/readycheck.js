@@ -13,8 +13,6 @@ var readycheck_in_progress = false;
 var readycheck_user = '';
 //READYCHECK command
 async function readycheck(interaction) {
-    
-
     if (readycheck_in_progress) {
         await interaction.reply({content: "A ready check is already in progress!", ephemeral: true});
         return;
@@ -43,13 +41,10 @@ async function readycheck(interaction) {
         );
     interaction.editReply({ content: " ", embeds: [embed], components: [row]});
     setTimeout(() => { closeReadycheck(interaction) }, 300000);
-
 }
 
 function readycheckButtonpressed(interaction) {
     //interaction.deferUpdate();
-
-    console.log(interaction.customId + ' ' + interaction.user.username)
     var ready = (interaction.customId === 'ready');
     readycheck_players[interaction.user.username] = ready;
 

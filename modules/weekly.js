@@ -11,9 +11,6 @@ const objects = require('./objects.js');
 async function weekly(interaction) {
     await interaction.deferReply();
     var user = interaction.options.getUser('username');
-
-    console.log("weekly: " + user.username + " " + user.id );
-
     if(!objects.players.hasOwnProperty(user.id)) {
         interaction.editReply("No dotabuff registerered for **" + user.username + "**!");
         return;

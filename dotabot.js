@@ -4,11 +4,12 @@
  * @description Entry point to dotabot Discord bot
  */
 
-const {Client, GatewayIntentBits } = require("discord.js");
+const {Client, GatewayIntentBits, ApplicationCommandOptionType } = require("discord.js");
 require('dotenv').config();
 const client  = new Client({ intents: [GatewayIntentBits.Guilds,
 									   GatewayIntentBits.GuildMessages,
-									   GatewayIntentBits.GuildMembers]
+									   GatewayIntentBits.GuildMembers,
+									   GatewayIntentBits.GuildMessageReactions]
 						   });
 const recent = require('./modules/recent.js');
 const weekly = require ('./modules/weekly.js');
@@ -121,6 +122,7 @@ client.on("ready", async () => {
 client.on('interactionCreate', async (interaction) => {
 	//interaction.reply({content: "slash commands down for maintenance", ephemeral: true});
 	if(interaction.isCommand()) {
+		print_command(interaction);
 		switch(interaction.commandName) {
 			case 'recent':
 				recent.recent(interaction);
@@ -164,10 +166,90 @@ client.on('interactionCreate', async (interaction) => {
 	}
 });
 
+client.on('messageReactionAdd', async (reaction, user) => {
+    // Check if the reaction is partial and fetch it
+    if (reaction.partial) {
+        try {
+            await reaction.fetch();
+        } catch (error) {
+            console.error('Something went wrong when fetching the reaction: ', error);
+            return;
+        }
+    }
+
+    console.log(`${user.tag} reacted with ${reaction.emoji.name}`);
+});
+
+
 async function list_members(guild) {
 	guild.members.fetch().then(members => {
         members.forEach(member => {
 			console.log(member.user.username + " " + member.id)
 		});
 	});
+}
+
+function print_command(interaction) {
+	if (!interaction.isCommand())
+		return;
+
+	const now = new Date();
+	let str = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}\n`;
+	str += `${interaction.user.tag}: ${interaction.commandName}`;
+
+	let subcommand = null;
+	if (interaction.options.getSubcommand(false)) {
+		subcommand = interaction.options.getSubcommand();
+		str += `(${subcommand})`;
+	}
+
+	const options = subcommand
+            ? interaction.options.data.find(opt => opt.type === ApplicationCommandOptionType.Subcommand).options
+            : interaction.options.data;
+
+	str += " {";
+	options.forEach(option => {
+		switch (option.type) {
+			case ApplicationCommandOptionType.User:
+				const user = interaction.options.getUser(option.name);
+				str += `${option.name}: ${user.tag} (ID: ${user.id})`;
+				break;
+
+			case ApplicationCommandOptionType.String:
+				const stringVal = interaction.options.getString(option.name);
+				str += `${option.name}: ${stringVal}`;
+				break;
+
+			case ApplicationCommandOptionType.Integer:
+				const intVal = interaction.options.getInteger(option.name);
+				str += `${option.name}:  ${intVal}`;
+				break;
+
+			case ApplicationCommandOptionType.Boolean:
+				const boolVal = interaction.options.getBoolean(option.name);
+				str += `${option.name}: ${boolVal}`;
+				break;
+
+			case ApplicationCommandOptionType.Channel:
+				const channel = interaction.options.getChannel(option.name);
+				str += `${option.name}: ${channel.name} (ID: ${channel.id})`;
+				break;
+
+			case ApplicationCommandOptionType.Role:
+				const role = interaction.options.getRole(option.name);
+				str += `${option.name}: ${role.name} (ID: ${role.id})`;
+				break;
+
+			case ApplicationCommandOptionType.Number:
+				const numberVal = interaction.options.getNumber(option.name);
+				str += `${option.name}: ${numberVal}`;
+				break;
+			default:
+				str += `${option.name}, ${option.value}`;
+				break;
+		}
+		str += ", ";
+	});
+	str += "}\n";
+	console.log(str);
 }

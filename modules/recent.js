@@ -15,8 +15,6 @@ async function recent(interaction) {
 
     if(interaction.options.getSubcommand() === 'username') {
         var user = interaction.options.getUser('username');
-        console.log("recent: " + user.username + " " + user.id );
-
         if(!objects.players.hasOwnProperty(user.id)) {
             interaction.editReply("No dotabuff registered for **" + user.username + "**!");
             return;
@@ -25,29 +23,72 @@ async function recent(interaction) {
     }
     else if (interaction.options.getSubcommand() === 'id') {
         playerID = interaction.options.getString('id');
-        console.log("recent: " + playerID );
     }
 
-    opendota.recentMatches(playerID).then(function(matches) {
+	let header = "";
+	let embeds = [];
+    await opendota.recentMatches(playerID).then(function(matches) {
         if (matches.length)                             
         {
-            var embeds = recentEmbed(matches.slice(0,5));
+            embeds = recentEmbed(matches.slice(0,5));
             if(interaction.options.getSubcommand() === 'username'){
-                interaction.editReply({ content: "Recent matches for **" + user.username + "**", 
-                                    embeds: embeds, });
+				header = "Recent matches for **" + user.username + "**";
             }
             else if (interaction.options.getSubcommand() === 'id') {
-                interaction.editReply({ content: "Recent matches for **" + playerID + "**", 
-                                        embeds: embeds, });
+				header = "Recent matches for **" + playerID + "**";
             }
         } else {
             interaction.editReply("OpenDota is not working, or something");
+			return;
         }
     }).catch(function(err) {
         console.log(err);
     });
+
+	const replyMessage = await interaction.editReply({
+		content: header,
+		embeds: embeds,
+		fetchReply: true
+	});
+
+	//await replyMessage.react('👍');
+
+	if (replyMessage.partial) {
+		try {
+			await replyMessage.fetch();
+		} catch (error) {
+			console.error('Error fetching message: ', error);
+			return;
+		}
+	}
+
+	//Create reaction collector for response message
+	try {
+		const filter = (reaction, user) => !user.bot; // Ignore bot reactions
+		const reactionCollector = await replyMessage.createReactionCollector({ filter, time: 60000});
+
+		reactionCollector.on('collect', (reaction, user) => {
+			console.log(`Reaction:${user.tag} ${reaction.emoji.name}`);
+		});
+
+		reactionCollector.on('end', collected => {
+			if (collected.size === 0) {
+				console.log('No reactions, deleting.');
+				replyMessage.delete()
+					.then(() => console.log('Message deleted.'))
+					.catch(err => console.error('Failed to delete message: ', err));
+			} else {
+				console.log('Cancelling message deletion.');
+			}
+		});
+	} catch (error) {
+		console.error('Error handling reactions: ', error);
+	}
 }
 
+
+
+// Create the embed for the /recent response
 function recentEmbed(matches) {
 	var embeds = [];
 	matches.forEach(function(match) {
@@ -81,6 +122,7 @@ function recentEmbed(matches) {
 	return embeds;
 }
 
+// Returns string of time elapsed since given timestamp
 function timeAgo(seconds) {
 	let time_since = (Date.now() - new Date(seconds * 1000))/60000; //convert to minutes
 	var unit = "minute";
