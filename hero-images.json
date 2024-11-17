@@ -1,4 +1,5 @@
-{"113": {"id": 113, "name": "Arc Warden", "image": "http://dotabuff.com/assets/heroes/arc-warden.jpg"},
+{"0": {"id": 0, "name": "Unknown", "image": "https://i.imgur.com/Y1Mjzcv.png"},
+ "113": {"id": 113, "name": "Arc Warden", "image": "http://dotabuff.com/assets/heroes/arc-warden.jpg"},
  "2": {"id": 2, "name": "Axe", "image": "http://dotabuff.com/assets/heroes/axe.jpg"},
  "11": {"id": 11, "name": "Shadow Fiend", "image": "http://dotabuff.com/assets/heroes/shadow-fiend.jpg"},
  "12": {"id": 12, "name": "Phantom Lancer", "image": "http://dotabuff.com/assets/heroes/phantom-lancer.jpg"},
@@ -122,4 +123,5 @@
  "10": {"id": 10, "name": "Morphling", "image": "http://dotabuff.com/assets/heroes/morphling.jpg"},
  "109": {"id": 109, "name": "Terrorblade", "image": "http://dotabuff.com/assets/heroes/terrorblade.jpg"},
  "65": {"id": 65, "name": "Batrider", "image": "http://dotabuff.com/assets/heroes/batrider.jpg"},
- "131": {"id": 131, "name": "Ringmaster", "image": "http://dotabuff.com/assets/heroes/ringmaster.jpg"}}
+ "131": {"id": 131, "name": "Ringmaster", "image": "http://dotabuff.com/assets/heroes/ringmaster.jpg"},
+ "145": {"id": 145, "name": "Kez", "image": "http://dotabuff.com/assets/heroes/kez.jpg"}}

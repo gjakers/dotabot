@@ -111,7 +111,11 @@ function heroesString(list) {
     arr.forEach((elem) => {
         string += '[0;';
         string += (elem.won == elem.lost) ? '33' : ((elem.won > elem.lost) ?  '32' : '31');
-        hero = objects.heroes[elem.id];
+	if (elem.id in objects.heroes) {
+	        hero = objects.heroes[elem.id];
+	} else {
+		hero = objects.heroes['0'];
+	}
         string += 'm' + hero.name + ' ' + elem.won + '-' + elem.lost + '\n';
     });
     string += "```"
