@@ -92,7 +92,12 @@ async function recent(interaction) {
 function recentEmbed(matches) {
 	var embeds = [];
 	matches.forEach(function(match) {
-		var hero = objects.heroes[match['hero_id']];
+		var hero;
+		if (match['hero_id'] in objects.heroes) {
+			hero = objects.heroes[match['hero_id']];
+		} else {
+			hero = objects.heroes["0"];
+		}
 		var duration_minutes = Math.floor(match.duration/60);
 		var duration_seconds = String(match.duration % 60).padStart(2, '0');
 		var won = (match.player_slot < 128) === match.radiant_win;
