@@ -124,4 +124,5 @@
  "109": {"id": 109, "name": "Terrorblade", "image": "http://dotabuff.com/assets/heroes/terrorblade.jpg"},
  "65": {"id": 65, "name": "Batrider", "image": "http://dotabuff.com/assets/heroes/batrider.jpg"},
  "131": {"id": 131, "name": "Ringmaster", "image": "http://dotabuff.com/assets/heroes/ringmaster.jpg"},
- "145": {"id": 145, "name": "Kez", "image": "http://dotabuff.com/assets/heroes/kez.jpg"}}
+ "145": {"id": 145, "name": "Kez", "image": "http://dotabuff.com/assets/heroes/kez.jpg"},
+ "155": {"id": 155, "name": "Largo", "image": "http://dotabuff.com/assets/heroes/largo.jpg"}}
