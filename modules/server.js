@@ -15,116 +15,185 @@ var last_checked = new Date();
 
 // JUDGEMENT
 async function judgement(guild) {
-    rankings = [];
-    var today = new Date();
+    const today = new Date();
     console.log("Judgement " + today.toLocaleString());
-    // Find anyone with 'dota' role and no dotabuff registered
-    guild.members.fetch().then(members => {
-        members.forEach(member => {
-            if(member.roles.cache.find( role => { 
-                    return (role.name === 'dota' || role.name === 'thin ice' || role.name === 'scum')})) {
-                if(!objects.players.hasOwnProperty(member.id)) {
-                    let gamer = new player.Player(member.id);
-                    console.log("BANNED: " + member.user.username);
-                    gamer.removeRole(guild, 'dota');
-                    gamer.removeRole(guild, 'thin ice');
-                    gamer.removeRole(guild, 'scum');
-                }
-            }
-        });
-    }).catch(function(err) {
-        console.log(err);
-    });
-    let king_solvers = [];
-    // Check everyone with dotabuff registered
-    for (var discord in objects.players) {
-        let gamer = new player.Player(discord);
-        let king_solver = gamer.exists(guild).then(async function(exists_in_server) {
-            if (exists_in_server) {
-                // Ignore OOTO gamers
-                 return await gamer.hasRole(guild, 'out-of-office').then(async function(is_ooto) {
-                    if(is_ooto) {
-                        //console.log(gamer.name + ": OUT OF OFFICE")
-                    } else {
-                        // Check matches for the week
-                        return await gamer.poll().then( async function() {
-                            let totals = gamer.totals();
-                            let sum = totals.unranked + totals.ranked + totals.turbo + totals.special;
-                            // Check time of last match for users with 0 weekly matches
-                            if (sum == 0) {
-                                await gamer.lastPlayed().then(async function(time_since) {
-                                    days_since = Math.floor((((time_since / 1000) / 60) / 60) / 24);
-                                    if(days_since < 14) {
-                                        //console.log("thin ice: " + gamer.name);
-                                        gamer.setRole(guild, 'thin ice');
-                                        gamer.removeRole(guild, 'dota');
-                                    }
-                                    else {
-                                        //console.log("scum: "+ gamer.name);
-                                        gamer.setRole(guild, 'scum');
-                                        gamer.removeRole(guild, 'dota');
-                                        gamer.removeRole(guild, 'thin ice');
-                                    }
-                                });
-                            } else {
-                                //checkProbation(guild, gamer, totals);
-                                gamer.setRole(guild, 'dota');
-                                gamer.removeRole(guild, 'scum');
-                                gamer.removeRole(guild, 'thin ice');
-                            }
-                            return(gamer);
-                        });
-                    }     
-                });
-            }
-        });
 
-        king_solvers.push(king_solver);
+    // Fetch Discord members first.
+    let members;
+    try {
+        members = await guild.members.fetch();
+    } catch (err) {
+        console.error("Judgement aborted: could not fetch Discord members.", err);
+        return;
     }
 
-    let most_played = 0;
-    let new_king = [];
-    let old_king = [];
-    for (var i=0; i < king_solvers.length; i++) {
-        let gamer = await king_solvers[i];
-        if (typeof gamer != 'undefined') {
-            await gamer.hasRole(guild, 'king').then( has_role => {
-                if (has_role) {
-                    old_king.push(gamer);
+    const playerStates = [];
+    try {
+        for (const discord of Object.keys(objects.players)) {
+            const member = members.get(discord);
+
+            // Player is registered but no longer in the Discord.
+            if (!member) {
+                continue;
+            }
+
+            // Ignore out-of-office players.
+            if (member.roles.cache.some(role => role.name === 'out-of-office')) {
+                continue;
+            }
+
+            const gamer = new player.Player(discord);
+
+            // Throws if OpenDota fails.
+            await gamer.poll();
+
+            const totals = gamer.totals();
+            const sum = totals.unranked +
+                        totals.ranked +
+                        totals.turbo +
+                        totals.special;
+            let days_since = null;
+
+            // We only need the older match-history query if they
+            // haven't played during the current weekly window.
+            if (sum === 0) {
+                const time_since = await gamer.lastPlayed();
+
+                // Infinity is valid here: means OpenDota successfully
+                // returned data but we found no qualifying previous match.
+                if (typeof time_since !== 'number' || Number.isNaN(time_since)) {
+                    throw new Error(
+                        `Invalid lastPlayed() result for ${gamer.name}`
+                    );
                 }
+
+                days_since = Math.floor(time_since / 86400000);
+            }
+
+            playerStates.push({
+                gamer,
+                member,
+                sum,
+                days_since
             });
+        }
 
-            let totals = gamer.totals();
-            let sum = totals.unranked + totals.ranked + totals.turbo + totals.special;
-            //console.log(gamer.name + ": " + sum)
-            if(sum >= most_played) {
-                if (sum > most_played) {
-                    new_king.length = 0;
+
+        if ((playerStates.length > 1) &&
+            (playerStates.every(state =>
+                                (state.sum === 0 &&
+                                 state.days_since === Infinity)))
+        ) {
+            throw new Error(
+                "OpenDota returned empty match history for every active player"
+            );
+        }
+
+    } catch (err) {
+        console.error(
+            "Judgement aborted: OpenDota data unavailable.",
+            err
+        );
+        return;
+    }
+
+    // Build leaderboard locally first.
+    const newRankings = playerStates
+        .map(state => ({
+            name: state.gamer.name,
+            count: state.sum
+        }))
+        .sort((a, b) => b.count - a.count);
+
+    // Commit last-known-good leaderboard.
+    rankings = newRankings;
+    last_checked = today;
+
+    // Remove Dota-related roles from anyone not registered in players.json.
+    for (const member of members.values()) {
+        if (!objects.players.hasOwnProperty(member.id)) {
+            const rolesToRemove = member.roles.cache.filter(role =>
+                role.name === 'dota' ||
+                role.name === 'thin ice' ||
+                role.name === 'scum' ||
+                role.name === 'king'
+            );
+
+            if (rolesToRemove.size > 0) {
+                console.log("BANNED: " + member.user.username);
+
+                for (const role of rolesToRemove.values()) {
+                    await member.roles.remove(role);
                 }
-                new_king.push(gamer);
-                most_played = sum;
             }
-            rankings.push({name: gamer.name, count: sum })
-            last_checked = today;
         }
     }
 
-    rankings.sort((a,b) => (b.count) - (a.count));
-    // Remove fallen kings
-    for(var i=0; i < old_king.length; i++) {
-        let king = old_king[i];
-        if(!new_king.includes(king)) {
-            king.removeRole(guild, 'king');
-            console.log("king has fallen: " + king.name);
+    // Apply roles
+    for (const state of playerStates) {
+        const gamer = state.gamer;
+
+        if (state.sum > 0) {
+            await gamer.setRole(guild, 'dota');
+            await gamer.removeRole(guild, 'scum');
+            await gamer.removeRole(guild, 'thin ice');
+        }
+        else if (state.days_since < 14) {
+            await gamer.setRole(guild, 'thin ice');
+            await gamer.removeRole(guild, 'dota');
+            await gamer.removeRole(guild, 'scum');
+        }
+        else {
+            await gamer.setRole(guild, 'scum');
+            await gamer.removeRole(guild, 'dota');
+            await gamer.removeRole(guild, 'thin ice');
         }
     }
 
-    // Crown new kings
-    for (var i=0; i < new_king.length; i++) {
-        let king = new_king[i];
-        if(!old_king.includes(king)) {
-            king.setRole(guild, 'king');
-            console.log("new king is crowned: " + king.name)
+    // Crown the King
+    if (playerStates.length > 0) {
+        const most_played = Math.max(
+            ...playerStates.map(state => state.sum)
+        );
+
+        // If everyone has zero weekly games, just preserve existing King state.
+        if (most_played > 0) {
+            const newKingIds = new Set(
+                playerStates
+                    .filter(state => state.sum === most_played)
+                    .map(state => state.member.id)
+            );
+
+            // Remove fallen / stale Kings, including OOTO players.
+            for (const member of members.values()) {
+                const kingRole = member.roles.cache.find(
+                    role => role.name === 'king'
+                );
+
+                if (kingRole && !newKingIds.has(member.id)) {
+                    await member.roles.remove(kingRole);
+                    console.log(
+                        "king has fallen: " +
+                        (objects.players[member.id]?.name ?? member.user.username)
+                    );
+                }
+            }
+
+            // Crown new King(s).
+            for (const state of playerStates) {
+                if (
+                    newKingIds.has(state.member.id) &&
+                    !state.member.roles.cache.some(role => role.name === 'king')
+                ) {
+                    await state.gamer.setRole(guild, 'king');
+                    console.log("new king is crowned: " + state.gamer.name);
+                }
+            }
+        }
+        else {
+            console.log(
+                "Nobody has played this week; preserving existing King."
+            );
         }
     }
 }
@@ -143,28 +212,50 @@ function checkProbation(guild, player, totals) {
 async function leaderboard(interaction) {
     await interaction.deferReply();
 
-    if(rankings.length <= 0) {
-        interaction.editReply({content: 'Something went wrong...',
-        ephemeral: true, });
-        return;
-    }
-    let str = '';
-    rankings.forEach((player) => {
-        if(player.count > 0) {
-            str += player.count.toString().padEnd(4, ' ');
-            str += player.name + '\n';
+    try {
+        if (rankings.length === 0) {
+            await interaction.editReply(
+                "Leaderboard data is not available yet. " +
+                "The bot has not yet completed a successful OpenDota refresh."
+            );
+            return;
         }
-    });
 
-    var ranks = new EmbedBuilder()
-        .addFields(
-            { name: ":crown: Weekly Leaderboard :crown:",
-              value: str,
-        })
-        .setFooter({ text: "Last updated " + ((Date.now() - last_checked)/60000).toFixed(0) + " minutes ago" })
-        .setColor('#F0C230')
+        const str = rankings
+            .filter(player => player.count > 0)
+            .map(player =>
+                player.count.toString().padEnd(4, ' ') +
+                player.name
+            )
+            .join('\n');
 
-    interaction.editReply({embeds: [ranks]});
+        const ranks = new EmbedBuilder()
+            .addFields({
+                name: ":crown: Weekly Leaderboard :crown:",
+                value: str || "Nobody has played in the last 7 days."
+            })
+            .setFooter({
+                text:
+                    "Last updated " +
+                    ((Date.now() - last_checked) / 60000).toFixed(0) +
+                    " minutes ago"
+            })
+            .setColor('#F0C230');
+
+        await interaction.editReply({ embeds: [ranks] });
+
+    } catch (err) {
+        console.error("Failed to display leaderboard:", err);
+
+        // Avoid leaving the Discord interaction spinning forever.
+        try {
+            await interaction.editReply(
+                "Something went wrong while displaying the leaderboard."
+            );
+        } catch (replyErr) {
+            console.error("Could not send leaderboard error message:", replyErr);
+        }
+    }
 }
 
 
