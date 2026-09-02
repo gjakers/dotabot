@@ -50,7 +50,7 @@ function weeklyStart(matches, user, player, stats) {
         .setURL("https://www.opendota.com/players/" + objects.players[user.id].id + "/matches?date=7&significant=0")
         .setThumbnail(player.profile.avatarmedium)
         .addFields(
-            { name: matches.length + ((matches.length === '1') ? " Match" : " Matches"),
+            { name: matches.length + ((matches.length === 1) ? " Match" : " Matches"),
               value: '**' + Math.round((stats.won / matches.length)*100) + "% Winrate**",
               inline: true,
             },

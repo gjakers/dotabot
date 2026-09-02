@@ -108,26 +108,36 @@ class Player {
 
 	// Milliseconds since last match
 	async lastPlayed() {
-		var options = { limit: '50', significant: '0'};
-		return opendota.playerMatches(this.id, options).then( matches => {
-			for (var match of matches) {
-				if (match.duration < 300)
-					continue;
-				if ((match.game_mode == game_modes.TURBO)	 ||
-					(match.game_mode == game_modes.SPECIAL)  ||
-					(match.lobby_type == lobby_types.RANKED) ||
-					(match.lobby_type == lobby_types.UNRANKED))
-				{						
-					return (Date.now() - new Date(match.start_time*1000));
-				}
+		const options = { limit: '50', significant: '0'};
+		const matches = await opendota.playerMatches(this.id, options);
+
+		if (!Array.isArray(matches)) {
+			throw new Error(`Invalid match history for ${this.name}`);
+		}
+
+		for (const match of matches) {
+			if (match.duration < 300)
+				continue;
+			if ((match.game_mode == game_modes.TURBO)	 ||
+				(match.game_mode == game_modes.SPECIAL)  ||
+				(match.lobby_type == lobby_types.RANKED) ||
+				(match.lobby_type == lobby_types.UNRANKED))
+			{						
+				return (Date.now() - new Date(match.start_time*1000));
 			}
-		});
+		}
+
+		return Infinity;
 	}
 
 	async poll() {
-		this.games = await this.#pollNormal();
-		//this.games = this.games.concat(await this.#pollNormal());
-		//this.games = this.games.concat(await this.#pollSpecial());
+		const games = await this.#pollNormal();
+
+		if (!Array.isArray(games)) {
+			throw new Error(`Invalid match data for ${this.name}`);
+		}
+
+		this.games = games;
 	}
 
 	async #pollNormal() {

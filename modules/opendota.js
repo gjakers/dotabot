@@ -6,53 +6,85 @@
 
 const request = require('request');
 
-const default_headers = {'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) " +
+const API_URL = "https://api.opendota.com/api";
+const CALL_INTERVAL_MS = 1100;
+const REQUEST_TIMEOUT_MS = 10000;
+const MAX_RETRIES = 5;
+const DEFAULT_HEADERS = {'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) " +
 									   "AppleWebKit/537.36 (KHTML, like Gecko) " +
 									   "Chrome/62.0.3202.94 " +
 									   "Safari/537.36"};
 
 var nextCall = Date.now();
 
-async function apiCall(cmd, tries = 0) {
-	var options = {
-		url: "https://api.opendota.com/api" + cmd,
-		headers: default_headers
-	};
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-	if (nextCall > Date.now()) {
-		await new Promise(resolve => setTimeout(resolve, nextCall - Date.now()));
-		return apiCall(cmd, tries);
+async function waitForRateLimit() {
+	const now = Date.now();
+	const scheduled = Math.max(now, nextCall);
+
+	nextCall = scheduled + CALL_INTERVAL_MS;
+
+	if (scheduled > now) {
+		await sleep(scheduled - now);
 	}
+}
 
-	nextCall = Date.now() + 1100;
-
-	return new Promise ((resolve, reject) => {
-		//process.stdout.write(tries + " ")
-		request(options, function(err, response, body) {
+function requestOnce(cmd) {
+	return new Promise((resolve, reject) => {
+		request({
+			url: API_URL + cmd,
+			headers: DEFAULT_HEADERS,
+			timeout: REQUEST_TIMEOUT_MS,
+		}, (err, response, body) => {
 			if (err) {
-				console.log(body)
-				if (tries > 5) {
-					console.log("5 tries...rejecting")
-				 	return reject(err);
-				}
-				else {
-					console.log(`ERROR: ${err}\nretrying(${tries})`);
-					return apiCall(cmd, ++tries);
-				}
+				return reject(err);
 			}
+
+			if (!response + response.statusCode < 200 || response.statusCode >= 300) {
+				return reject (new Error(
+					`OpenDota returned HTTP ${response?.statusCode ?? 'unknown'}`
+				));
+			}
+
+			let parsed;
+
 			try {
-				var parsed_body = JSON.parse(body);
-				if(parsed_body.error != null) {
-					return apiCall(cmd, ++tries);
-				} else {
-					resolve(parsed_body);
-				}
-			} catch(err) {
-				console.log("Opendota API failed: \n" + cmd + '\n');
-				resolve('');
+				parsed = JSON.parse(body);
+			} catch {
+				return reject(new Error('OpenDota returned invalid JSON'));
 			}
+
+			if (parsed?.error != null) {
+				return reject(new Error(`OpenDota error: ${parsed.error}`));
+			}
+
+			resolve(parsed);
 		});
 	});
+}
+
+async function apiCall(cmd) {
+    let lastError;
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        await waitForRateLimit();
+
+        try {
+            return await requestOnce(cmd);
+        } catch (err) {
+            lastError = err;
+
+            console.error(
+                `OpenDota request failed (${attempt + 1}/${MAX_RETRIES + 1}): ${cmd}`,
+                err.message
+            );
+        }
+    }
+
+    throw lastError;
 }
 
 function optionsString(options) {
