@@ -10,40 +10,53 @@ const objects = require('./objects.js');
 // WEEKLY command
 async function weekly(interaction) {
     await interaction.deferReply();
-    var user = interaction.options.getUser('username');
+
+    const user = interaction.options.getUser('username');
+
     if(!objects.players.hasOwnProperty(user.id)) {
-        interaction.editReply("No dotabuff registerered for **" + user.username + "**!");
+        await interaction.editReply(
+            "No dotabuff registerered for **" + user.username + "**!"
+        );
         return;
     }
 
-    var playerID = objects.players[user.id].id;
+    const playerID = objects.players[user.id].id;
 
-    opendota.playerMatches(playerID, { "date": 7, "significant": 0}).then(function(matches) {
-        opendota.getPlayer(playerID).then(async function(player) {
-            if(matches.length == 0) {
-                var nogames = new EmbedBuilder()
-                    .setTitle(user.username + "'s week in DotA 2")
-                    .setURL("https://www.opendota.com/players/" + objects.players[user.id].id + "/matches?date=7&significant=0")
-                    .setThumbnail(player.profile.avatarmedium)
-                    .setFooter({text: "They didn't play! Sad!", iconURL: "https://static.wikia.nocookie.net/dota2_gamepedia/images/1/17/Emoticon_sick.gif"})
+    let matches;
+    let player;
 
-                interaction.editReply({ embeds: [nogames], });
-                return;
-            }
+    try{
+        matches = await opendota.playerMatches(playerID, { "date": 7, "significant": 0});
+        player  = await opendota.getPlayer(playerID);
+    } catch (err) {
+        console.error("OpenDota failed to respond during /weekly:", err);
+        await interaction.editReply(
+            "OpenDota is not responding. Could not fetch matches."
+        );
+        return;
+    }
 
-            let stats = weeklyStats(matches);
-            var embeds = weeklyStart(matches, user, player, stats);
-            interaction.editReply({ embeds: embeds, });
-        }).catch(function(err) {
-            console.log(err);
-        });
-    }).catch(function(err) {
-        console.log(err);
-    });
+    if(matches.length == 0) {
+        const nogames = new EmbedBuilder()
+            .setTitle(user.username + "'s week in DotA 2")
+            .setURL("https://www.opendota.com/players/" + objects.players[user.id].id + "/matches?date=7&significant=0")
+            .setThumbnail(player.profile.avatarmedium)
+            .setFooter({text: "They didn't play! Sad!",
+                        iconURL: "https://static.wikia.nocookie.net/dota2_gamepedia/images/1/17/Emoticon_sick.gif"})
+
+        interaction.editReply({ embeds: [nogames], });
+        return;
+    }
+
+    const stats = weeklyStats(matches);
+    const embeds = weeklyStart(matches, user, player, stats);
+
+    await interaction.editReply({ embeds: embeds, });
 }
 
 function weeklyStart(matches, user, player, stats) {
-    let mmr = (stats.ranked_won - stats.ranked_lost);
+    const mmr = (stats.ranked_won - stats.ranked_lost);
+    const winrate = Math.round((stats.won / matches.length)*100);
     var embeds = [];
     var header = new EmbedBuilder()
         .setTitle(player.profile.personaname + "'s week in DotA 2")
@@ -51,7 +64,7 @@ function weeklyStart(matches, user, player, stats) {
         .setThumbnail(player.profile.avatarmedium)
         .addFields(
             { name: matches.length + ((matches.length === 1) ? " Match" : " Matches"),
-              value: '**' + Math.round((stats.won / matches.length)*100) + "% Winrate**",
+              value: '**' + winrate + "% Winrate**",
               inline: true,
             },
             { name: stats.modes.ranked + " Ranked",
@@ -59,7 +72,7 @@ function weeklyStart(matches, user, player, stats) {
               inline: true,
             },
             { name: "Ranked W/L: " + (mmr > 0 ? "+" : "") + mmr ,
-              value: "**Rank: " + rankString(player.rank_tier) + '**',
+              value: "**" + rankString(player.rank_tier) + '**',
               inline: true,
             },
             { name: "Heroes played",
@@ -67,7 +80,7 @@ function weeklyStart(matches, user, player, stats) {
               inline: false,
             },
         )
-        .setColor('#242f39')
+        .setColor(winrateColor(winrate))
         .setFooter({text: "Excluding special game modes from heroes list", iconURL: "https://static.wikia.nocookie.net/dota2_gamepedia/images/a/ac/Emoticon_hookless.gif"})
     embeds.push(header);
     return embeds;
@@ -102,22 +115,49 @@ function rankString(rank_tier) {
 
 function heroesString(list) {
     let arr = [];
+
     for (var hero in list) {
         arr.push(list[hero]);
     }
+
     arr.sort((a,b) =>  (b.won + b.lost) - (a.won + a.lost));
 
-    let string = "```ansi\n";
-    arr.forEach((elem) => {
-        string += '[0;';
-        string += (elem.won == elem.lost) ? '33' : ((elem.won > elem.lost) ?  '32' : '31');
-	if (elem.id in objects.heroes) {
-	        hero = objects.heroes[elem.id];
-	} else {
-		hero = objects.heroes['0'];
-	}
-        string += 'm' + hero.name + ' ' + elem.won + '-' + elem.lost + '\n';
+    const rows = arr.map(elem => {
+        let hero;
+
+        if (elem.id in objects.heroes) {
+            hero = objects.heroes[elem.id];
+        } else {
+            hero = objects.heroes['0'];
+        }
+
+        return {
+            name: hero.name,
+            won: elem.won,
+            lost: elem.lost
+        };
     });
+
+    const nameWidth = Math.max(...rows.map(row => row.name.length));
+
+    const winWidth  = Math.max(1, ...rows.map(row => row.won.toString().length));
+
+    const lossWidth = Math.max(1, ...rows.map(row => row.lost.toString().length));
+
+    let string = "```ansi\n";
+
+    rows.forEach(row => {
+        const color = row.won === row.lost ? '33' :
+                      row.won >   row.lost ? '32' :
+                                             '31';
+        const name   = row.name.padEnd(nameWidth);
+        const wins   = row.won.toString().padStart(winWidth);
+        const losses = row.lost.toString().padStart(lossWidth);                                     
+        
+        string += `\u001b[0;${color}m` +
+                  `${name}  ${wins}-${losses}\n`;
+    });
+
     string += "```"
     return string;
 }
@@ -164,4 +204,34 @@ function weeklyStats(matches) {
     });    
     return stats;
 }
+
+function winrateColor(winrate) {
+    winrate = Math.max(0, Math.min(100, winrate));
+
+    const red   = [255,  23,  68];
+    const gray  = [128, 128, 128];
+    const green = [  0, 230, 118];
+
+    let start, end, t;
+
+    if (winrate <= 50) {
+        start = red;
+        end = gray;
+        t = winrate / 50;
+    } else {
+        start = gray;
+        end = green;
+        t = (winrate - 50) / 50;
+    }
+
+    const rgb = start.map((value, i) =>
+        Math.round(value + (end[i] - value) * t)
+    );
+
+    return (
+        "#" +
+        rgb.map(value => value.toString(16).padStart(2, "0")).join("")
+    );
+}
+
 module.exports = {weekly, };
