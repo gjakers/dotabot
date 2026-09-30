@@ -43,7 +43,7 @@ function requestOnce(cmd) {
 				return reject(err);
 			}
 
-			if (!response + response.statusCode < 200 || response.statusCode >= 300) {
+			if (!response || response.statusCode < 200 || response.statusCode >= 300) {
 				return reject (new Error(
 					`OpenDota returned HTTP ${response?.statusCode ?? 'unknown'}`
 				));

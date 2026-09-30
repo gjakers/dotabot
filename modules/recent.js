@@ -27,31 +27,29 @@ async function recent(interaction) {
 
 	let header = "";
 	let embeds = [];
-    await opendota.recentMatches(playerID).then(function(matches) {
-        if (matches.length)                             
-        {
-            embeds = recentEmbed(matches.slice(0,5));
-            if(interaction.options.getSubcommand() === 'username'){
-				header = "Recent matches for **" + user.username + "**";
-            }
-            else if (interaction.options.getSubcommand() === 'id') {
-				header = "Recent matches for **" + playerID + "**";
-            }
-        } else {
-            interaction.editReply("OpenDota is not working, or something");
-			return;
-        }
-    }).catch(function(err) {
-        console.log(err);
-    });
+	let matches;
+
+	try {
+		matches = await opendota.recentMatches(playerID);
+	} 
+	catch (err) {
+		console.error("OpenDota failed during /recent: ", err);
+		await interaction.editReply("OpenDota is not responding. Unable to fetch matches.");
+		return;
+	}
+	
+	if (matches.length === 0) {
+		await interaction.editReply("No recent matches found.");
+		return;
+	}
+
+	embeds = recentEmbed(matches.slice(0,5));
 
 	const replyMessage = await interaction.editReply({
 		content: header,
 		embeds: embeds,
 		fetchReply: true
 	});
-
-	//await replyMessage.react('👍');
 
 	if (replyMessage.partial) {
 		try {
@@ -85,7 +83,6 @@ async function recent(interaction) {
 		console.error('Error handling reactions: ', error);
 	}
 }
-
 
 
 // Create the embed for the /recent response
@@ -141,6 +138,5 @@ function timeAgo(seconds) {
 	}
 	return Math.floor(time_since).toString() + " " + unit + ((Math.floor(time_since) > 1) ? "s" : "");
 }
-
 
 module.exports = {recent, };
